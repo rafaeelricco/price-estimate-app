@@ -3,7 +3,9 @@
 import * as React from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import { Plus, Send, Trash2 } from 'lucide-react'
 
 const PriceEstimate: React.FC = () => {
@@ -86,7 +88,7 @@ const PriceEstimate: React.FC = () => {
             <h3 className="text-lg font-semibold">1. Lista de Tarefas</h3>
             {tasks.map((task, index) => (
                <div key={index} className="flex gap-4">
-                  <input
+                  <Input
                      type="text"
                      placeholder="Descrição da tarefa"
                      value={task.description}
@@ -95,7 +97,7 @@ const PriceEstimate: React.FC = () => {
                      }
                      className="flex-grow rounded border p-2"
                   />
-                  <input
+                  <Input
                      type="number"
                      placeholder="Horas"
                      value={task.hours}
@@ -126,7 +128,7 @@ const PriceEstimate: React.FC = () => {
             <h3 className="text-lg font-semibold">2. Taxa Horária</h3>
             <div className="flex items-center gap-2">
                <span>R$</span>
-               <input
+               <Input
                   type="number"
                   placeholder="Valor por hora"
                   value={hourlyRate}
@@ -141,7 +143,7 @@ const PriceEstimate: React.FC = () => {
          <div className="space-y-2">
             <h3 className="text-lg font-semibold">3. Margem de Segurança</h3>
             <div className="flex items-center gap-2">
-               <input
+               <Input
                   type="number"
                   value={safetyMargin}
                   onChange={(e) => setSafetyMargin(e.target.value)}
@@ -157,7 +159,7 @@ const PriceEstimate: React.FC = () => {
                4. Ajuste de Valor Percebido
             </h3>
             <div className="flex items-center gap-2">
-               <input
+               <Input
                   type="number"
                   value={valueAdjustment}
                   onChange={(e) => setValueAdjustment(e.target.value)}
@@ -187,7 +189,7 @@ const PriceEstimate: React.FC = () => {
          <div className="space-y-4">
             <h3 className="text-lg font-semibold">Análise com IA</h3>
             <div className="space-y-4">
-               <textarea
+               <Textarea
                   placeholder="Descreva o contexto do projeto, incluindo complexidade, prazo, tecnologias necessárias e qualquer informação relevante para a análise..."
                   value={projectContext}
                   onChange={(e) => setProjectContext(e.target.value)}
