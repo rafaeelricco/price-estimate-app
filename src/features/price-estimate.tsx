@@ -466,14 +466,14 @@ const AiCalculator: React.FC = () => {
          {/* Resumo do Cálculo - make it stack on mobile */}
          {form.watch('tasks').length > 0 && (
             <div className="rounded-lg bg-gray-50 p-4">
-               <h3 className="text-lg font-semibold">Resumo do Cálculo Base</h3>
+               <h3 className="text-lg font-semibold">Resumo do cálculo base</h3>
                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-4">
                   <p>
                      Base:{' '}
                      {formatCurrency(calculateTotal(form.watch()).baseTotal)}
                   </p>
                   <p>
-                     Com Margem:{' '}
+                     Com margem:{' '}
                      {formatCurrency(
                         calculateTotal(form.watch()).withSafetyMargin
                      )}
