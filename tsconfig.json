@@ -1,27 +1,41 @@
 {
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
+   "compilerOptions": {
+      "target": "ES2017",
+      "lib": ["dom", "dom.iterable", "esnext"],
+      "allowJs": true,
+      "skipLibCheck": true,
+      "strict": true,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "module": "esnext",
+      "moduleResolution": "bundler",
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "jsx": "preserve",
+      "incremental": true,
+      "plugins": [
+         {
+            "name": "next"
+         }
+      ],
+      "baseUrl": ".",
+      "paths": {
+         "@/*": ["./src/*"],
+         "@/app/*": ["./src/app/*"],
+         "@/pages/*": ["./src/components/pages/*"],
+         "@/components/*": ["./src/components/*"],
+         "@/styles/*": ["./src/styles/*"],
+         "@/routes/*": ["./src/routes/*"],
+         "@/mocks/*": ["./src/mocks/*"],
+         "@/lib/*": ["./src/lib/*"],
+         "@/hooks/*": ["./src/hooks/*"],
+         "@/fonts/*": ["./src/public/fonts/*"],
+         "@/dictionaries/*": ["./src/dictionaries/*"],
+         "@/features/*": ["./src/features/*"],
+         "@/utils/*": ["./src/utils/*"],
+         "@/icons/*": ["./src/components/icons/*"]
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+   },
+   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+   "exclude": ["node_modules"]
 }
