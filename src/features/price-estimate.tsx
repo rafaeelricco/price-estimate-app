@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as z from 'zod'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
    Form,
    FormControl,
@@ -35,14 +35,18 @@ const md = new MarkdownIt({
    typographer: true
 })
 
+const AiAnalysisSchema = z.object({
+   suggestedTotal: z.number().positive('O valor sugerido deve ser positivo'),
+   explanation: z.string().min(1, 'A explicação é obrigatória'),
+   marketAnalysis: z.string().min(1, 'A análise de mercado é obrigatória'),
+   confidence: z.number().min(0).max(100).optional(),
+   factors: z.array(z.string()).optional(),
+   recommendations: z.array(z.string()).optional()
+})
+
 const PriceEstimate: React.FC = () => {
    return (
       <Card className="grid min-h-dvh w-full place-items-center">
-         <CardHeader>
-            <CardTitle className="text-center text-2xl font-bold">
-               Calculadora de Projetos Freelancer
-            </CardTitle>
-         </CardHeader>
          <CardContent>
             <AiCalculator />
          </CardContent>
@@ -183,23 +187,25 @@ const AiCalculator: React.FC = () => {
             safetyMargin: '20',
             valueAdjustment: '0'
          },
-         context: { projectContext: '' }
+         context: { projectContext: '' },
+         aiAnalysis: null
       }
    })
-   const [aiAnalysis, setAiAnalysis] = React.useState<AiAnalysis | null>(null)
    const [isLoading, setIsLoading] = React.useState(false)
 
    const onSubmit = async (values: PriceEstimate) => {
       setIsLoading(true)
       try {
          const result = await handleAiAnalysis(values)
-         if (result) setAiAnalysis(result)
+         if (result) form.setValue('aiAnalysis', result)
       } catch (error) {
          console.error('Erro:', error)
       } finally {
          setIsLoading(false)
       }
    }
+
+   const aiAnalysis = form.watch('aiAnalysis')
 
    return (
       <div className="space-y-6">
@@ -387,58 +393,58 @@ const AiCalculator: React.FC = () => {
             <div className="mt-8 text-center">
                <span className="text-gray-600">Analisando projeto...</span>
             </div>
-         ) : (
-            aiAnalysis && (
-               <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-6">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                     Análise da IA
-                  </h3>
+         ) : aiAnalysis ? (
+            <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-6">
+               <h3 className="text-xl font-semibold text-gray-900">
+                  Análise da IA
+               </h3>
 
-                  {/* Valor Sugerido */}
-                  <div className="rounded-md bg-white p-4 shadow-sm">
-                     <p className="text-2xl font-bold text-green-600">
-                        Valor Sugerido:{' '}
-                        {formatCurrency(aiAnalysis.suggestedTotal)}
+               {/* Valor Sugerido */}
+               <div className="rounded-md bg-white p-4 shadow-sm">
+                  <p className="text-2xl font-bold text-green-600">
+                     Valor Sugerido:{' '}
+                     {formatCurrency(aiAnalysis?.suggestedTotal ?? 0)}
+                  </p>
+                  {aiAnalysis?.confidence && (
+                     <p className="text-sm text-gray-500">
+                        Confiança da análise: {aiAnalysis?.confidence}%
                      </p>
-                     {aiAnalysis.confidence && (
-                        <p className="text-sm text-gray-500">
-                           Confiança da análise: {aiAnalysis.confidence}%
-                        </p>
-                     )}
-                  </div>
+                  )}
+               </div>
 
-                  {/* Explicação */}
-                  <div className="space-y-2">
-                     <h4 className="font-medium text-gray-700">Explicação</h4>
-                     <div
-                        className="prose prose-gray max-w-none text-gray-600"
-                        dangerouslySetInnerHTML={{
-                           __html: md.render(aiAnalysis.explanation)
-                        }}
-                     />
-                  </div>
+               {/* Explicação */}
+               <div className="space-y-2">
+                  <h4 className="font-medium text-gray-700">Explicação</h4>
+                  <div
+                     className="prose prose-gray max-w-none text-gray-600"
+                     dangerouslySetInnerHTML={{
+                        __html: md.render(aiAnalysis?.explanation ?? '')
+                     }}
+                  />
+               </div>
 
-                  {/* Análise de Mercado */}
-                  <div className="space-y-2">
-                     <h4 className="font-medium text-gray-700">
-                        Análise de Mercado
-                     </h4>
-                     <div
-                        className="prose prose-gray max-w-none italic text-gray-600"
-                        dangerouslySetInnerHTML={{
-                           __html: md.render(aiAnalysis.marketAnalysis)
-                        }}
-                     />
-                  </div>
+               {/* Análise de Mercado */}
+               <div className="space-y-2">
+                  <h4 className="font-medium text-gray-700">
+                     Análise de Mercado
+                  </h4>
+                  <div
+                     className="prose prose-gray max-w-none italic text-gray-600"
+                     dangerouslySetInnerHTML={{
+                        __html: md.render(aiAnalysis?.marketAnalysis ?? '')
+                     }}
+                  />
+               </div>
 
-                  {/* Fatores Considerados */}
-                  {aiAnalysis.factors && aiAnalysis.factors.length > 0 && (
+               {/* Fatores Considerados */}
+               {aiAnalysis?.factors?.length &&
+                  aiAnalysis?.factors?.length > 0 && (
                      <div className="space-y-2">
                         <h4 className="font-medium text-gray-700">
                            Fatores Considerados
                         </h4>
                         <ul className="space-y-2">
-                           {aiAnalysis.factors.map((factor, index) => (
+                           {aiAnalysis?.factors?.map((factor, index) => (
                               <li
                                  key={index}
                                  className="prose prose-gray max-w-none"
@@ -451,29 +457,28 @@ const AiCalculator: React.FC = () => {
                      </div>
                   )}
 
-                  {/* Recomendações */}
-                  {aiAnalysis.recommendations &&
-                     aiAnalysis.recommendations.length > 0 && (
-                        <div className="space-y-2">
-                           <h4 className="font-medium text-gray-700">
-                              Recomendações
-                           </h4>
-                           <ul className="space-y-2">
-                              {aiAnalysis.recommendations.map((rec, index) => (
-                                 <li
-                                    key={index}
-                                    className="prose prose-gray max-w-none"
-                                    dangerouslySetInnerHTML={{
-                                       __html: md.render(rec)
-                                    }}
-                                 />
-                              ))}
-                           </ul>
-                        </div>
-                     )}
-               </div>
-            )
-         )}
+               {/* Recomendações */}
+               {aiAnalysis?.recommendations?.length &&
+                  aiAnalysis?.recommendations?.length > 0 && (
+                     <div className="space-y-2">
+                        <h4 className="font-medium text-gray-700">
+                           Recomendações
+                        </h4>
+                        <ul className="space-y-2">
+                           {aiAnalysis?.recommendations?.map((rec, index) => (
+                              <li
+                                 key={index}
+                                 className="prose prose-gray max-w-none"
+                                 dangerouslySetInnerHTML={{
+                                    __html: md.render(rec)
+                                 }}
+                              />
+                           ))}
+                        </ul>
+                     </div>
+                  )}
+            </div>
+         ) : null}
       </div>
    )
 }
@@ -521,17 +526,8 @@ const ProjectContextSchema = z.object({
 const PriceEstimateSchema = z.object({
    tasks: z.array(TaskSchema).min(1, 'Adicione pelo menos uma tarefa'),
    config: CalculationConfigSchema,
-   context: ProjectContextSchema
-})
-
-// Schema para o retorno da API
-const AiAnalysisSchema = z.object({
-   suggestedTotal: z.number().positive('O valor sugerido deve ser positivo'),
-   explanation: z.string().min(1, 'A explicação é obrigatória'),
-   marketAnalysis: z.string().min(1, 'A análise de mercado é obrigatória'),
-   confidence: z.number().min(0).max(100).optional(),
-   factors: z.array(z.string()).optional(),
-   recommendations: z.array(z.string()).optional()
+   context: ProjectContextSchema,
+   aiAnalysis: AiAnalysisSchema.nullable().optional()
 })
 
 // Types inferidos do schema
