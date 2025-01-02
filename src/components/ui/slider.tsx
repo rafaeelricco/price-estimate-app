@@ -41,12 +41,7 @@ export const Slider: React.FC<SliderProps> = ({
 
    return (
       <React.Fragment>
-         <div className="flex w-full justify-start gap-3">
-            <p className="text-base text-white">Volume</p>
-            <p className="text-base text-white">{internalValue}</p>
-         </div>
-         <div className="duration-[350ms] *:duration-[350ms] group flex w-full touch-none select-none items-center gap-3 transition-[margin] hover:-mx-3 hover:cursor-grab active:cursor-grabbing">
-            {/* <SpeakerXMarkIcon className="size-5 shrink-0 transition group-hover:scale-125 group-hover:text-white" /> */}
+         <div className="duration-[350ms] *:duration-[350ms] group flex w-full touch-none select-none items-center gap-3 transition-[margin] hover:-mx-1 hover:cursor-grab active:cursor-grabbing">
             <RadixSlider.Root
                name={name}
                min={min}
@@ -77,20 +72,19 @@ export const Slider: React.FC<SliderProps> = ({
             >
                <RadixSlider.Track
                   className={cn(
-                     'relative h-full grow overflow-hidden rounded-full bg-gray-700',
+                     'relative h-full grow overflow-hidden rounded-full bg-gray-300',
                      {
                         'group-has-[:focus-visible]:outline group-has-[:focus-visible]:outline-2 group-has-[:focus-visible]:outline-offset-2 group-has-[:focus-visible]:outline-sky-500':
                            isUsingPointer === false
                      }
                   )}
                >
-                  <RadixSlider.Range className="absolute h-full bg-gray-300 transition group-hover:bg-white">
-                     <div className="absolute inset-0 group-has-[:focus-visible]:bg-white" />
+                  <RadixSlider.Range className="absolute h-full bg-gray-700 transition group-hover:bg-gray-900">
+                     <div className="absolute inset-0 group-has-[:focus-visible]:bg-gray-900" />
                   </RadixSlider.Range>
                </RadixSlider.Track>
                <RadixSlider.Thumb />
             </RadixSlider.Root>
-            {/* <SpeakerWaveIcon className="size-5 shrink-0 transition group-hover:scale-125 group-hover:text-white" /> */}
          </div>
       </React.Fragment>
    )

@@ -20,6 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
+import { Slider } from '@/components/ui/slider'
 import { TooltipGenericMessage } from '@/components/ui/tooltip'
 import {
    calculateTotal,
@@ -48,7 +49,7 @@ const AiAnalysisSchema = z.object({
 const PriceEstimate: React.FC = () => {
    return (
       <div className="flex min-h-screen items-center justify-center">
-         <Card className="max-w-screen-md border-none transition-all duration-300">
+         <Card className="max-w-screen-md border-none shadow-none transition-all duration-300">
             <CardContent className="p-0">
                <AiCalculator />
             </CardContent>
@@ -95,14 +96,24 @@ const handleAiAnalysis = async (values: PriceEstimate) => {
          - Valor base calculado: ${formatCurrency(baseTotal)}
 
          TAREFAS DO PROJETO:
-         ${values.tasks.map((task) => `- ${task.description} (${task.hours}h)`).join('\n')}
+         ${values.tasks
+            .map(
+               (task) =>
+                  `- ${task.description} (${task.hours}h)
+             Nível de dificuldade: ${['Muito fácil', 'Fácil', 'Médio', 'Intermediário', 'Difícil', 'Muito difícil'][task.difficulty]}
+            `
+            )
+            .join('\n')}
+
+         Por favor, considere o nível de dificuldade de cada tarefa ao fazer sua análise e ajuste o valor sugerido de acordo.
+         Tarefas mais difíceis podem requerer um valor/hora maior devido à complexidade técnica envolvida.
 
          Por favor, forneça sua análise no seguinte formato específico:
 
          VALOR_SUGERIDO: [apenas o número em reais]
 
          EXPLICAÇÃO:
-         [sua explicação detalhada]
+         [sua explicação detalhada, incluindo como a dificuldade das tarefas influenciou o valor]
 
          ANÁLISE_DE_MERCADO:
          [sua análise do mercado]
@@ -184,7 +195,7 @@ const AiCalculator: React.FC = () => {
    const form = useForm<PriceEstimate>({
       resolver: zodResolver(PriceEstimateSchema),
       defaultValues: {
-         tasks: [{ description: '', hours: '' }],
+         tasks: [{ description: '', hours: '', difficulty: 2 }],
          config: {
             hourlyRate: '',
             safetyMargin: '',
@@ -217,55 +228,98 @@ const AiCalculator: React.FC = () => {
                {/* Lista de Tarefas */}
                <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Lista de Tarefas</h3>
-                  {form.watch('tasks').map((_, index) => (
-                     <div key={index} className="flex gap-4">
+                  {form.watch('tasks').map((task, index) => (
+                     <div
+                        key={index}
+                        className="space-y-4 rounded-lg bg-gray-50 p-4"
+                     >
+                        <div className="flex gap-4">
+                           <FormField
+                              control={form.control}
+                              name={`tasks.${index}.description`}
+                              render={({ field }) => (
+                                 <FormItem className="flex-grow">
+                                    <FormLabel>Descrição da tarefa</FormLabel>
+                                    <FormControl>
+                                       <Input
+                                          placeholder="Ex: Desenvolver a tela de login"
+                                          {...field}
+                                       />
+                                    </FormControl>
+                                    <FormMessage />
+                                 </FormItem>
+                              )}
+                           />
+                           <FormField
+                              control={form.control}
+                              name={`tasks.${index}.hours`}
+                              render={({ field }) => (
+                                 <FormItem className="w-56">
+                                    <FormLabel>Horas previstas</FormLabel>
+                                    <FormControl>
+                                       <Input
+                                          type="number"
+                                          placeholder="Ex: 10"
+                                          {...field}
+                                       />
+                                    </FormControl>
+                                    <FormMessage />
+                                 </FormItem>
+                              )}
+                           />
+                           <Button
+                              type="button"
+                              variant="ghost"
+                              className="mt-8 p-2 text-red-500 hover:text-red-700"
+                              onClick={() =>
+                                 form.watch('tasks').length > 1 &&
+                                 form.setValue(
+                                    'tasks',
+                                    form
+                                       .watch('tasks')
+                                       .filter((_, i) => i !== index)
+                                 )
+                              }
+                           >
+                              <Trash2 size={20} />
+                           </Button>
+                        </div>
+
                         <FormField
                            control={form.control}
-                           name={`tasks.${index}.description`}
+                           name={`tasks.${index}.difficulty`}
                            render={({ field }) => (
-                              <FormItem className="flex-grow">
+                              <FormItem>
+                                 <FormLabel>Nível de dificuldade</FormLabel>
                                  <FormControl>
-                                    <Input
-                                       placeholder="Ex: Desenvolver a tela de login"
-                                       {...field}
-                                    />
+                                    <div className="space-y-2">
+                                       <Slider
+                                          min={0}
+                                          max={5}
+                                          step={1}
+                                          value={field.value}
+                                          onValueChange={(value) =>
+                                             field.onChange(value)
+                                          }
+                                       />
+                                       <div className="text-sm text-gray-600">
+                                          {
+                                             [
+                                                'Muito fácil',
+                                                'Fácil',
+                                                'Médio',
+                                                'Intermediário',
+                                                'Difícil',
+                                                'Muito difícil'
+                                             ][field.value]
+                                          }
+                                       </div>
+                                    </div>
                                  </FormControl>
                                  <FormMessage />
                               </FormItem>
                            )}
                         />
-                        <FormField
-                           control={form.control}
-                           name={`tasks.${index}.hours`}
-                           render={({ field }) => (
-                              <FormItem className="w-56">
-                                 <FormControl>
-                                    <Input
-                                       type="number"
-                                       placeholder="Ex: 10"
-                                       {...field}
-                                    />
-                                 </FormControl>
-                                 <FormMessage />
-                              </FormItem>
-                           )}
-                        />
-                        <Button
-                           type="button"
-                           variant="ghost"
-                           className="p-2 text-red-500 hover:text-red-700"
-                           onClick={() =>
-                              form.watch('tasks').length > 1 &&
-                              form.setValue(
-                                 'tasks',
-                                 form
-                                    .watch('tasks')
-                                    .filter((_, i) => i !== index)
-                              )
-                           }
-                        >
-                           <Trash2 size={20} />
-                        </Button>
                      </div>
                   ))}
                   <Button
@@ -274,7 +328,7 @@ const AiCalculator: React.FC = () => {
                      onClick={() =>
                         form.setValue('tasks', [
                            ...form.watch('tasks'),
-                           { description: '', hours: '' }
+                           { description: '', hours: '', difficulty: 0 }
                         ])
                      }
                      className="flex items-center gap-2"
@@ -536,7 +590,8 @@ const TaskSchema = z.object({
       .max(200, 'Descrição muito longa'),
    hours: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
       message: 'Horas devem ser um número positivo'
-   })
+   }),
+   difficulty: z.number().min(0).max(5).default(2)
 })
 
 // Schema para as configurações do cálculo
