@@ -20,6 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
+import { TooltipGenericMessage } from '@/components/ui/tooltip'
 import {
    calculateTotal,
    extractSection,
@@ -213,7 +214,7 @@ const AiCalculator: React.FC = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                {/* Lista de Tarefas */}
                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">1. Lista de Tarefas</h3>
+                  <h3 className="text-lg font-semibold">Lista de Tarefas</h3>
                   {form.watch('tasks').map((_, index) => (
                      <div key={index} className="flex gap-4">
                         <FormField
@@ -288,7 +289,16 @@ const AiCalculator: React.FC = () => {
                      name="config.hourlyRate"
                      render={({ field }) => (
                         <FormItem>
-                           <FormLabel>2. Taxa Horária</FormLabel>
+                           <FormLabel
+                              tooltip={
+                                 <TooltipGenericMessage
+                                    title="Taxa Horária"
+                                    description="É o valor que você cobra por hora de trabalho."
+                                 />
+                              }
+                           >
+                              Taxa Horária
+                           </FormLabel>
                            <div className="flex items-center gap-2">
                               <span>R$</span>
                               <FormControl>
@@ -310,7 +320,16 @@ const AiCalculator: React.FC = () => {
                      name="config.safetyMargin"
                      render={({ field }) => (
                         <FormItem>
-                           <FormLabel>3. Margem</FormLabel>
+                           <FormLabel
+                              tooltip={
+                                 <TooltipGenericMessage
+                                    title="Margem"
+                                    description="É o valor que você adiciona ao valor base para garantir uma margem de lucro."
+                                 />
+                              }
+                           >
+                              Margem
+                           </FormLabel>
                            <div className="flex items-center gap-2">
                               <FormControl>
                                  <Input type="number" {...field} />
@@ -327,7 +346,16 @@ const AiCalculator: React.FC = () => {
                      name="config.valueAdjustment"
                      render={({ field }) => (
                         <FormItem>
-                           <FormLabel>4. Ajuste</FormLabel>
+                           <FormLabel
+                              tooltip={
+                                 <TooltipGenericMessage
+                                    title="Ajuste"
+                                    description="É o valor que você adiciona ao valor base para garantir uma margem de lucro."
+                                 />
+                              }
+                           >
+                              Ajuste
+                           </FormLabel>
                            <div className="flex items-center gap-2">
                               <FormControl>
                                  <Input type="number" {...field} />
@@ -346,7 +374,7 @@ const AiCalculator: React.FC = () => {
                   name="context.projectContext"
                   render={({ field }) => (
                      <FormItem>
-                        <FormLabel>5. Análise com IA</FormLabel>
+                        <FormLabel>Análise com IA</FormLabel>
                         <FormControl>
                            <Textarea
                               placeholder="Descreva o contexto do projeto, incluindo complexidade, prazo, tecnologias necessárias..."
