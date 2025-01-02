@@ -41,7 +41,7 @@ export const Slider: React.FC<SliderProps> = ({
 
    return (
       <React.Fragment>
-         <div className="duration-[350ms] *:duration-[350ms] group flex w-full touch-none select-none items-center gap-3 transition-[margin] hover:-mx-1 hover:cursor-grab active:cursor-grabbing">
+         <div className="duration-350 *:duration-350 group flex w-full touch-none select-none items-center gap-3 transition-[margin] hover:-mx-1 hover:cursor-grab active:cursor-grabbing">
             <RadixSlider.Root
                name={name}
                min={min}
@@ -52,7 +52,11 @@ export const Slider: React.FC<SliderProps> = ({
                className="relative flex h-1.5 w-full grow items-center transition-[height] group-hover:h-4"
                onValueCommit={([v]) => updateValue(v)}
                onPointerDown={(e) => {
-                  setStash({ clientX: e.clientX, value: internalValue })
+                  const currentValue = value ?? internalValue
+                  setStash({
+                     clientX: e.clientX,
+                     value: currentValue
+                  })
                   setIsUsingPointer(true)
                }}
                onPointerMove={(e) => {
