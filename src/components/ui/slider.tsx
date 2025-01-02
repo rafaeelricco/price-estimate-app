@@ -49,7 +49,7 @@ export const Slider: React.FC<SliderProps> = ({
                step={step}
                value={[value ?? internalValue]}
                defaultValue={[defaultValue]}
-               className="relative flex h-1.5 w-full grow items-center transition-[height] group-hover:h-4"
+               className="relative flex h-2 w-full grow items-center transition-[height] group-hover:h-4"
                onValueCommit={([v]) => updateValue(v)}
                onPointerDown={(e) => {
                   const currentValue = value ?? internalValue

@@ -14,20 +14,19 @@ import {
    FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, Sparkles, Trash2 } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-
 import { Slider } from '@/components/ui/slider'
+import { Textarea } from '@/components/ui/textarea'
 import { TooltipGenericMessage } from '@/components/ui/tooltip'
 import {
    calculateTotal,
    extractSection,
    formatCurrency
 } from '@/utils/formatters'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Plus, Sparkles, Trash2 } from 'lucide-react'
 import MarkdownIt from 'markdown-it'
+import { useForm } from 'react-hook-form'
 
 // Inicializa o markdown parser com opções específicas
 const md = new MarkdownIt({
@@ -48,8 +47,8 @@ const AiAnalysisSchema = z.object({
 
 const PriceEstimate: React.FC = () => {
    return (
-      <div className="container flex min-h-screen items-center justify-center">
-         <Card className="max-w-screen-md border-none shadow-none transition-all duration-300">
+      <div className="grid min-h-[calc(100vh-4rem)] place-items-center">
+         <Card className="w-full max-w-screen-md border-none px-6 py-8 shadow-none transition-all duration-300 md:py-0">
             <CardContent className="p-0">
                <AiCalculator />
             </CardContent>
@@ -233,7 +232,7 @@ const AiCalculator: React.FC = () => {
                         key={index}
                         className="space-y-4 rounded-lg bg-gray-50 p-4"
                      >
-                        <div className="flex gap-4">
+                        <div className="flex flex-col gap-4 sm:flex-row">
                            <FormField
                               control={form.control}
                               name={`tasks.${index}.description`}
@@ -254,7 +253,7 @@ const AiCalculator: React.FC = () => {
                               control={form.control}
                               name={`tasks.${index}.hours`}
                               render={({ field }) => (
-                                 <FormItem className="w-56">
+                                 <FormItem className="sm:w-56">
                                     <FormLabel>Horas previstas</FormLabel>
                                     <FormControl>
                                        <Input
@@ -270,7 +269,7 @@ const AiCalculator: React.FC = () => {
                            <Button
                               type="button"
                               variant="ghost"
-                              className="mt-8 p-2 text-red-500 hover:text-red-700"
+                              className="self-end p-2 text-red-500 hover:text-red-700 sm:mt-8"
                               onClick={() =>
                                  form.watch('tasks').length > 1 &&
                                  form.setValue(
@@ -290,7 +289,9 @@ const AiCalculator: React.FC = () => {
                            name={`tasks.${index}.difficulty`}
                            render={({ field }) => (
                               <FormItem>
-                                 <FormLabel>Nível de dificuldade</FormLabel>
+                                 <FormLabel className="no-selection">
+                                    Nível de dificuldade
+                                 </FormLabel>
                                  <FormControl>
                                     <div className="space-y-2">
                                        <Slider
@@ -302,7 +303,7 @@ const AiCalculator: React.FC = () => {
                                              field.onChange(value)
                                           }
                                        />
-                                       <div className="text-sm text-gray-600">
+                                       <div className="no-selection text-sm text-gray-600">
                                           {
                                              [
                                                 'Muito fácil',
@@ -331,15 +332,15 @@ const AiCalculator: React.FC = () => {
                            { description: '', hours: '', difficulty: 0 }
                         ])
                      }
-                     className="flex items-center gap-2"
+                     className="no-selection flex items-center gap-2"
                   >
                      <Plus size={20} />
                      Adicionar Tarefa
                   </Button>
                </div>
 
-               {/* Configurações */}
-               <div className="grid grid-cols-3 gap-6">
+               {/* Configurações - make it stack on mobile */}
+               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
                   <FormField
                      control={form.control}
                      name="config.hourlyRate"
@@ -392,7 +393,6 @@ const AiCalculator: React.FC = () => {
                                     {...field}
                                  />
                               </FormControl>
-                              <span>%</span>
                            </div>
                            <FormMessage />
                         </FormItem>
@@ -422,7 +422,6 @@ const AiCalculator: React.FC = () => {
                                     {...field}
                                  />
                               </FormControl>
-                              <span>%</span>
                            </div>
                            <FormMessage />
                         </FormItem>
@@ -464,11 +463,11 @@ const AiCalculator: React.FC = () => {
             </form>
          </Form>
 
-         {/* Resumo do Cálculo */}
+         {/* Resumo do Cálculo - make it stack on mobile */}
          {form.watch('tasks').length > 0 && (
             <div className="rounded-lg bg-gray-50 p-4">
                <h3 className="text-lg font-semibold">Resumo do Cálculo Base</h3>
-               <div className="mt-2 grid grid-cols-3 gap-4">
+               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-4">
                   <p>
                      Base:{' '}
                      {formatCurrency(calculateTotal(form.watch()).baseTotal)}
@@ -487,13 +486,13 @@ const AiCalculator: React.FC = () => {
             </div>
          )}
 
-         {/* Resultado da IA */}
+         {/* Resultado da IA - adjust padding for mobile */}
          {isLoading ? (
             <div className="mt-8 text-center">
                <span className="text-gray-600">Analisando projeto...</span>
             </div>
          ) : aiAnalysis ? (
-            <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-6">
+            <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
                <h3 className="text-xl font-semibold text-gray-900">
                   Análise da IA
                </h3>
