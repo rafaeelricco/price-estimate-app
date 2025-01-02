@@ -211,7 +211,7 @@ const AiCalculator: React.FC = () => {
    return (
       <div className="space-y-6">
          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                {/* Lista de Tarefas */}
                <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Lista de Tarefas</h3>
@@ -292,15 +292,14 @@ const AiCalculator: React.FC = () => {
                            <FormLabel
                               tooltip={
                                  <TooltipGenericMessage
-                                    title="Taxa Horária"
+                                    title="Taxa horária"
                                     description="É o valor que você cobra por hora de trabalho."
                                  />
                               }
                            >
-                              Taxa Horária
+                              Taxa horária
                            </FormLabel>
                            <div className="flex items-center gap-2">
-                              <span>R$</span>
                               <FormControl>
                                  <Input
                                     type="number"
@@ -308,7 +307,6 @@ const AiCalculator: React.FC = () => {
                                     {...field}
                                  />
                               </FormControl>
-                              <span>/hora</span>
                            </div>
                            <FormMessage />
                         </FormItem>
@@ -328,11 +326,15 @@ const AiCalculator: React.FC = () => {
                                  />
                               }
                            >
-                              Margem
+                              Margem de segurança
                            </FormLabel>
                            <div className="flex items-center gap-2">
                               <FormControl>
-                                 <Input type="number" {...field} />
+                                 <Input
+                                    type="number"
+                                    placeholder="Ex: 20"
+                                    {...field}
+                                 />
                               </FormControl>
                               <span>%</span>
                            </div>
@@ -349,16 +351,20 @@ const AiCalculator: React.FC = () => {
                            <FormLabel
                               tooltip={
                                  <TooltipGenericMessage
-                                    title="Ajuste"
+                                    title="Ajuste de valor"
                                     description="É o valor que você adiciona ao valor base para garantir uma margem de lucro."
                                  />
                               }
                            >
-                              Ajuste
+                              Ajuste de valor
                            </FormLabel>
                            <div className="flex items-center gap-2">
                               <FormControl>
-                                 <Input type="number" {...field} />
+                                 <Input
+                                    type="number"
+                                    placeholder="Ex: 10"
+                                    {...field}
+                                 />
                               </FormControl>
                               <span>%</span>
                            </div>
@@ -430,7 +436,7 @@ const AiCalculator: React.FC = () => {
                {/* Valor Sugerido */}
                <div className="rounded-md bg-white p-4 shadow-sm">
                   <p className="text-2xl font-bold text-green-600">
-                     Valor Sugerido:{' '}
+                     Valor sugerido:{' '}
                      {formatCurrency(aiAnalysis?.suggestedTotal ?? 0)}
                   </p>
                   {aiAnalysis?.confidence && (
@@ -454,7 +460,7 @@ const AiCalculator: React.FC = () => {
                {/* Análise de Mercado */}
                <div className="space-y-2">
                   <h4 className="font-medium text-gray-700">
-                     Análise de Mercado
+                     Análise de mercado
                   </h4>
                   <div
                      className="prose prose-gray max-w-none italic text-gray-600"
@@ -469,7 +475,7 @@ const AiCalculator: React.FC = () => {
                   aiAnalysis?.factors?.length > 0 && (
                      <div className="space-y-2">
                         <h4 className="font-medium text-gray-700">
-                           Fatores Considerados
+                           Fatores considerados
                         </h4>
                         <ul className="space-y-2">
                            {aiAnalysis?.factors?.map((factor, index) => (

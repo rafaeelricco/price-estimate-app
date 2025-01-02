@@ -9,7 +9,17 @@ const TooltipProvider = TooltipPrimitive.Provider
 
 const Tooltip = TooltipPrimitive.Root
 
-const TooltipTrigger = TooltipPrimitive.Trigger
+const TooltipTrigger = React.forwardRef<
+   React.ElementRef<typeof TooltipPrimitive.Trigger>,
+   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
+>(({ ...props }, ref) => (
+   <TooltipPrimitive.Trigger
+      ref={ref}
+      onClick={(e) => e.preventDefault()}
+      {...props}
+   />
+))
+TooltipTrigger.displayName = TooltipPrimitive.Trigger.displayName
 
 const TooltipContent = React.forwardRef<
    React.ElementRef<typeof TooltipPrimitive.Content>,
@@ -32,7 +42,7 @@ const TooltipGenericMessage: React.FC<{
    description: string
 }> = ({ title, description }) => {
    return (
-      <div className="space-y-1">
+      <div className="space-y-0.5">
          <p className="text-sm font-semibold text-black-primary">{title}</p>
          <p className="text-sm text-neutral-500">{description}</p>
       </div>
