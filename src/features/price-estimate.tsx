@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import { TooltipGenericMessage } from '@/components/ui/tooltip'
+import { useAnimatedText } from '@/hooks/useAnimatedText'
 import {
    calculateTotal,
    extractSection,
@@ -57,19 +58,19 @@ const PriceEstimate: React.FC = () => {
    )
 }
 
-const handleAiAnalysis = async (values: PriceEstimate) => {
+const handleAiAnalysis = async (
+   values: PriceEstimate,
+   onStreamUpdate: (text: string) => void
+) => {
    try {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
-
-      // Debug log
       if (!apiKey) {
          console.error('API Key não encontrada!')
          throw new Error('API Key não configurada')
       }
 
-      // Inicializa o modelo Gemini
       const genAI = new GoogleGenerativeAI(apiKey)
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
 
       const totalHours = values.tasks.reduce(
          (sum, task) => sum + (Number(task.hours) || 0),
@@ -123,14 +124,22 @@ const handleAiAnalysis = async (values: PriceEstimate) => {
          RECOMENDAÇÕES:
          - [liste as recomendações]`
 
-      // Gera o conteúdo
-      const result = await model.generateContent(prompt)
-      const response = result.response.text()
+      // Gera o conteúdo usando streaming
+      const result = await model.generateContentStream(prompt)
+      let fullResponse = ''
 
-      // Processa a resposta
+      // Processa cada chunk da resposta
+      for await (const chunk of result.stream) {
+         const chunkText = chunk.text()
+         fullResponse += chunkText
+         // Emite o chunk para animação
+         onStreamUpdate(fullResponse)
+      }
+
+      // Processa a resposta final
       try {
          // Extrai o valor sugerido (procura por um número após "VALOR_SUGERIDO:")
-         const valueMatch = response.match(
+         const valueMatch = fullResponse.match(
             /VALOR_SUGERIDO:\s*R?\$?\s*([\d,.]+)/i
          )
          const suggestedTotal = valueMatch
@@ -139,22 +148,22 @@ const handleAiAnalysis = async (values: PriceEstimate) => {
 
          // Extrai as seções usando os marcadores
          const explanation = extractSection(
-            response,
+            fullResponse,
             'EXPLICAÇÃO:',
             'ANÁLISE_DE_MERCADO:'
          )
          const marketAnalysis = extractSection(
-            response,
+            fullResponse,
             'ANÁLISE_DE_MERCADO:',
             'FATORES:'
          )
          const factorsSection = extractSection(
-            response,
+            fullResponse,
             'FATORES:',
             'RECOMENDAÇÕES:'
          )
          const recommendationsSection = extractSection(
-            response,
+            fullResponse,
             'RECOMENDAÇÕES:',
             null
          )
@@ -205,11 +214,16 @@ const AiCalculator: React.FC = () => {
       }
    })
    const [isLoading, setIsLoading] = React.useState(false)
+   const [streamedText, setStreamedText] = React.useState('')
+   const formattedAnimatedText = useAnimatedText(streamedText)
 
    const onSubmit = async (values: PriceEstimate) => {
       setIsLoading(true)
+      setStreamedText('')
       try {
-         const result = await handleAiAnalysis(values)
+         const result = await handleAiAnalysis(values, (text) => {
+            setStreamedText(text)
+         })
          if (result) form.setValue('aiAnalysis', result)
       } catch (error) {
          console.error('Erro:', error)
@@ -486,10 +500,17 @@ const AiCalculator: React.FC = () => {
             </div>
          )}
 
-         {/* Resultado da IA - adjust padding for mobile */}
+         {/* Resultado da IA */}
          {isLoading ? (
-            <div className="mt-8 text-center">
-               <span className="text-gray-600">Analisando projeto...</span>
+            <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
+               <h3 className="text-xl font-semibold text-gray-900">
+                  Análise da IA
+               </h3>
+               <div
+                  className="prose prose-gray max-w-none"
+                  dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
+               />
+               <span className="animate-pulse">|</span>
             </div>
          ) : aiAnalysis ? (
             <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
