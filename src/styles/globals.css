@@ -69,7 +69,7 @@ input:-webkit-autofill {
 
 input:-webkit-autofill {
    -webkit-box-shadow: 0 0 0 0 transparent inset;
-   -webkit-text-fill-color: white;
+   -webkit-text-fill-color: #000;
 }
 
 input {
