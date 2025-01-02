@@ -48,7 +48,7 @@ const AiAnalysisSchema = z.object({
 
 const PriceEstimate: React.FC = () => {
    return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="container flex min-h-screen items-center justify-center">
          <Card className="max-w-screen-md border-none shadow-none transition-all duration-300">
             <CardContent className="p-0">
                <AiCalculator />
