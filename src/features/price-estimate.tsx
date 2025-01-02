@@ -185,8 +185,8 @@ const AiCalculator: React.FC = () => {
          tasks: [{ description: '', hours: '' }],
          config: {
             hourlyRate: '',
-            safetyMargin: '20',
-            valueAdjustment: '0'
+            safetyMargin: '',
+            valueAdjustment: ''
          },
          context: { projectContext: '' },
          aiAnalysis: null
@@ -224,7 +224,7 @@ const AiCalculator: React.FC = () => {
                               <FormItem className="flex-grow">
                                  <FormControl>
                                     <Input
-                                       placeholder="Descrição da tarefa"
+                                       placeholder="Ex: Desenvolver a tela de login"
                                        {...field}
                                     />
                                  </FormControl>
@@ -236,11 +236,11 @@ const AiCalculator: React.FC = () => {
                            control={form.control}
                            name={`tasks.${index}.hours`}
                            render={({ field }) => (
-                              <FormItem className="w-24">
+                              <FormItem className="w-56">
                                  <FormControl>
                                     <Input
                                        type="number"
-                                       placeholder="Horas"
+                                       placeholder="Ex: 10"
                                        {...field}
                                     />
                                  </FormControl>
@@ -380,7 +380,16 @@ const AiCalculator: React.FC = () => {
                   name="context.projectContext"
                   render={({ field }) => (
                      <FormItem>
-                        <FormLabel>Análise com IA</FormLabel>
+                        <FormLabel
+                           tooltip={
+                              <TooltipGenericMessage
+                                 title="Contexto do projeto"
+                                 description="Descreva o contexto do seu projeto para que a IA possa analisar e sugerir um valor adequado. A IA considerará: complexidade técnica, escopo, prazos, tecnologias, e gerará um relatório detalhado com valor sugerido, explicação, análise de mercado, fatores considerados e recomendações específicas."
+                              />
+                           }
+                        >
+                           Análise com IA
+                        </FormLabel>
                         <FormControl>
                            <Textarea
                               placeholder="Descreva o contexto do projeto, incluindo complexidade, prazo, tecnologias necessárias..."
@@ -537,6 +546,7 @@ const CalculationConfigSchema = z.object({
       }),
    safetyMargin: z
       .string()
+      .min(1, 'Margem de segurança é obrigatória')
       .refine(
          (val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 100,
          { message: 'Margem de segurança deve ser entre 0 e 100%' }
