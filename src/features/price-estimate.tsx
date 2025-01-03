@@ -468,7 +468,7 @@ const AiCalculator: React.FC = () => {
                   type="submit"
                   className="flex items-center gap-2"
                >
-                  <Sparkles size={20} />
+                  <Sparkles size={20} className="mr-1.5" />
                   Analisar com IA
                </Button>
             </form>
@@ -498,15 +498,17 @@ const AiCalculator: React.FC = () => {
          )}
 
          {/* Resultado da IA */}
-         {isLoading ? (
+         {isLoading && formattedAnimatedText ? (
             <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
                <h3 className="text-xl font-semibold text-gray-900">
                   Análise da IA
                </h3>
                <div className="flex flex-col">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                     {formattedAnimatedText}
-                  </ReactMarkdown>
+                  {formattedAnimatedText && (
+                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {formattedAnimatedText}
+                     </ReactMarkdown>
+                  )}
                </div>
             </div>
          ) : aiAnalysis ? (
