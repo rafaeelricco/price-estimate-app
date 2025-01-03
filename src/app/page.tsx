@@ -1,5 +1,5 @@
-import PriceEstimate from '@/features/price-estimate'
+import PriceEstimateCalculator from '@/features/price-estimate'
 
 export default function Home() {
-   return <PriceEstimate />
+   return <PriceEstimateCalculator />
 }

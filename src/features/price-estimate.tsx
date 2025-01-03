@@ -3,7 +3,6 @@
 import * as React from 'react'
 import * as z from 'zod'
 
-import { AiResultDisplay } from '@/components/ui/ai-result-display'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -18,15 +17,16 @@ import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import { TooltipGenericMessage } from '@/components/ui/tooltip'
+import { PriceEstimateResult } from '@/features/price-estimate-result'
+import { calculateTotal, formatCurrency } from '@/features/price-estimate.utils'
 import { useAnimatedText } from '@/hooks/useAnimatedText'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipBoard'
-import { calculateTotal, formatCurrency } from '@/utils/formatters'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-const PriceEstimate: React.FC = () => {
+const PriceEstimateCalculator: React.FC = () => {
    return (
       <div className="grid min-h-[calc(100vh-4rem)] place-items-center">
          <Card className="w-full max-w-screen-md border-none px-4 py-8 shadow-none transition-all duration-300 md:py-0">
@@ -440,7 +440,7 @@ const AiCalculator: React.FC = () => {
                </div>
             </div>
          )}
-         <AiResultDisplay
+         <PriceEstimateResult
             isLoading={isLoading}
             formattedText={formattedAnimatedText}
             isCompleted={isCompleted}
@@ -504,4 +504,4 @@ export type ProjectContext = z.infer<typeof ProjectContextSchema>
 export type PriceEstimate = z.infer<typeof PriceEstimateSchema>
 export type AiAnalysis = z.infer<typeof AiAnalysisSchema>
 
-export default PriceEstimate
+export default PriceEstimateCalculator

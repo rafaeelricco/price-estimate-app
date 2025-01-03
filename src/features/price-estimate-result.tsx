@@ -10,7 +10,7 @@ import rehypeSlug from 'rehype-slug'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 
-interface AiResultDisplayProps {
+interface PriceEstimateResultProps {
    isLoading: boolean
    formattedText: string
    isCompleted: boolean
@@ -18,7 +18,7 @@ interface AiResultDisplayProps {
    onCopy: () => void
 }
 
-export const AiResultDisplay: React.FC<AiResultDisplayProps> = ({
+export const PriceEstimateResult: React.FC<PriceEstimateResultProps> = ({
    isLoading,
    formattedText,
    isCompleted,
