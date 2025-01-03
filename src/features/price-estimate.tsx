@@ -3,6 +3,7 @@
 import * as React from 'react'
 import * as z from 'zod'
 
+import { AiResultDisplay } from '@/components/ui/ai-result-display'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -25,8 +26,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-import { AiResultDisplay } from '@/components/ui/ai-result-display'
-
 const AiAnalysisSchema = z.object({
    suggestedTotal: z
       .number()
@@ -41,7 +40,7 @@ const AiAnalysisSchema = z.object({
 const PriceEstimate: React.FC = () => {
    return (
       <div className="grid min-h-[calc(100vh-4rem)] place-items-center">
-         <Card className="w-full max-w-screen-md border-none px-6 py-8 shadow-none transition-all duration-300 md:py-0">
+         <Card className="w-full max-w-screen-md border-none px-4 py-8 shadow-none transition-all duration-300 md:py-0">
             <CardContent className="p-0">
                <AiCalculator />
             </CardContent>
