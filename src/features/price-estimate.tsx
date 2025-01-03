@@ -234,7 +234,7 @@ const AiCalculator: React.FC = () => {
          <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Lista de Tarefas</h3>
+                  <h3 className="text-lg font-semibold">Lista de tarefas</h3>
                   {form.watch('tasks').map((task, index) => (
                      <div
                         key={index}
