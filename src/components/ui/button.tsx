@@ -43,7 +43,15 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
    (
-      { className, variant, size, asChild = false, loading = false, ...props },
+      {
+         className,
+         variant,
+         size,
+         asChild = false,
+         loading = false,
+         onClick,
+         ...props
+      },
       ref
    ) => {
       const Comp = asChild ? Slot : 'button'
@@ -53,6 +61,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                buttonVariants({ variant, size, className }),
                loading && 'cursor-wait'
             )}
+            onClick={(e) => {
+               if (loading) return
+               onClick?.(e)
+            }}
             disabled={loading || props.disabled}
             ref={ref}
             {...props}
