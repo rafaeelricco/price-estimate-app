@@ -1,6 +1,6 @@
-import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -38,17 +38,36 @@ export interface ButtonProps
    extends React.ButtonHTMLAttributes<HTMLButtonElement>,
       VariantProps<typeof buttonVariants> {
    asChild?: boolean
+   loading?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-   ({ className, variant, size, asChild = false, ...props }, ref) => {
+   (
+      { className, variant, size, asChild = false, loading = false, ...props },
+      ref
+   ) => {
       const Comp = asChild ? Slot : 'button'
       return (
          <Comp
-            className={cn(buttonVariants({ variant, size, className }))}
+            className={cn(
+               buttonVariants({ variant, size, className }),
+               loading && 'cursor-wait'
+            )}
+            disabled={loading || props.disabled}
             ref={ref}
             {...props}
-         />
+         >
+            <div className="relative flex items-center justify-center">
+               <span
+                  className={cn(loading && 'invisible', 'flex items-center')}
+               >
+                  {props.children}
+               </span>
+               {loading && (
+                  <span className="loader animation-spin absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+               )}
+            </div>
+         </Comp>
       )
    }
 )

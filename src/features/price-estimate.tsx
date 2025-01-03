@@ -463,7 +463,11 @@ const AiCalculator: React.FC = () => {
                      </FormItem>
                   )}
                />
-               <Button type="submit" className="flex items-center gap-2">
+               <Button
+                  loading={isLoading}
+                  type="submit"
+                  className="flex items-center gap-2"
+               >
                   <Sparkles size={20} />
                   Analisar com IA
                </Button>

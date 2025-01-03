@@ -96,3 +96,28 @@ input {
    user-select: none;
    touch-action: none;
 }
+
+@layer components {
+   .loader {
+      border-top: 2px solid currentColor;
+      border-left: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      border-right: 2px solid transparent;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+   }
+
+   .animation-spin {
+      animation: spin 0.75s linear infinite;
+   }
+
+   @keyframes spin {
+      from {
+         transform: translate(-50%, -50%) rotate(0deg);
+      }
+      to {
+         transform: translate(-50%, -50%) rotate(360deg);
+      }
+   }
+}
