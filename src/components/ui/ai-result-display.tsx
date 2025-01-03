@@ -39,11 +39,9 @@ export const AiResultDisplay: React.FC<AiResultDisplayProps> = ({
          <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-gray-900">Resultado</h3>
          </div>
-
          <div className={proseClasses}>
             <ReactMarkdown {...markdownProps}>{formattedText}</ReactMarkdown>
          </div>
-
          {!isLoading && isCompleted && (
             <Button
                type="button"
