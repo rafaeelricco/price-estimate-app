@@ -26,6 +26,11 @@ import { Check, Copy, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
 import ReactMarkdown from 'react-markdown'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeRaw from 'rehype-raw'
+import rehypeSlug from 'rehype-slug'
+import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 
 const AiAnalysisSchema = z.object({
@@ -140,7 +145,6 @@ const AiCalculator: React.FC = () => {
             IMPORTANTE: Sua resposta DEVE seguir EXATAMENTE esta estrutura, mantendo a formatação Markdown:
 
             # Valor sugerido: R$ [VALOR_CALCULADO]
-            > Confiança da análise: 85%
 
             ## Explicação
             [Explicação clara e objetiva do valor sugerido, considerando o valor base calculado e justificando eventuais ajustes. Foque em demonstrar o valor para o cliente.]
@@ -213,7 +217,6 @@ const AiCalculator: React.FC = () => {
             suggestedTotal,
             explanation: fullResponse,
             marketAnalysis: '',
-            confidence: 85,
             factors: [],
             recommendations: []
          })
@@ -503,9 +506,17 @@ const AiCalculator: React.FC = () => {
                <h3 className="text-xl font-semibold text-gray-900">
                   Análise da IA
                </h3>
-               <div className="flex flex-col">
+               <div className="prose prose-slate flex max-w-none flex-col">
                   {formattedAnimatedText && (
-                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                     <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkBreaks]}
+                        rehypePlugins={[
+                           rehypeRaw,
+                           rehypeSlug,
+                           [rehypeAutolinkHeadings, { behavior: 'wrap' }],
+                           rehypeHighlight
+                        ]}
+                     >
                         {formattedAnimatedText}
                      </ReactMarkdown>
                   )}
@@ -518,9 +529,19 @@ const AiCalculator: React.FC = () => {
                      Análise da IA
                   </h3>
                </div>
-               <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {formattedAnimatedText}
-               </ReactMarkdown>
+               <div className="prose prose-slate prose-headings:text-xl prose-headings:my-1 prose-headings:font-semibold prose-blockquote:my-1 prose-a:no-underline prose-blockquote:text-gray-600 prose-blockquote:font-normal prose-blockquote:text-base prose-strong:font-semibold max-w-none font-inter">
+                  <ReactMarkdown
+                     remarkPlugins={[remarkGfm, remarkBreaks]}
+                     rehypePlugins={[
+                        rehypeRaw,
+                        rehypeSlug,
+                        [rehypeAutolinkHeadings, { behavior: 'wrap' }],
+                        rehypeHighlight
+                     ]}
+                  >
+                     {formattedAnimatedText}
+                  </ReactMarkdown>
+               </div>
                {isCompleted && (
                   <Button
                      type="button"
