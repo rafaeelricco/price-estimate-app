@@ -1,9 +1,11 @@
-import { PriceEstimate } from '@/features/price-estimate'
+import { PriceEstimate } from '@/features/price-estimate.schema'
 
 export const calculateTotal = (values: PriceEstimate) => {
    const baseTotal =
-      values.tasks.reduce((sum, task) => sum + (Number(task.hours) || 0), 0) *
-      Number(values.config.hourlyRate)
+      values.tasks.reduce(
+         (sum: number, task: any) => sum + (Number(task.hours) || 0),
+         0
+      ) * Number(values.config.hourlyRate)
 
    const withSafetyMargin =
       baseTotal * (1 + Number(values.config.safetyMargin) / 100)

@@ -1,3 +1,10 @@
+import 'highlight.js/styles/atom-one-dark.css'
+import 'highlight.js/styles/dracula.css'
+import 'highlight.js/styles/monokai.css'
+import 'highlight.js/styles/night-owl.css'
+import 'highlight.js/styles/nord.css'
+import 'highlight.js/styles/vs2015.css'
+
 import '@/styles/globals.css'
 import '@/styles/reset.css'
 

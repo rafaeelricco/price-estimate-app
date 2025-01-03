@@ -1,14 +1,10 @@
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
+import { ReactMarkdownPlugins } from '@/lib/react-markdown'
 import { Check, Copy } from 'lucide-react'
 
 import ReactMarkdown from 'react-markdown'
-import rehypeHighlight from 'rehype-highlight'
-import rehypeRaw from 'rehype-raw'
-import rehypeSlug from 'rehype-slug'
-import remarkBreaks from 'remark-breaks'
-import remarkGfm from 'remark-gfm'
 
 interface PriceEstimateResultProps {
    isLoading: boolean
@@ -25,11 +21,6 @@ export const PriceEstimateResult: React.FC<PriceEstimateResultProps> = ({
    isCopied,
    onCopy
 }) => {
-   const markdownProps = {
-      remarkPlugins: [remarkGfm, remarkBreaks],
-      rehypePlugins: [rehypeRaw, rehypeSlug, rehypeHighlight]
-   }
-
    const containerClasses = 'mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6'
    const proseClasses =
       'prose prose-slate prose-headings:text-xl prose-headings:my-1 prose-headings:font-semibold prose-blockquote:my-1 prose-a:no-underline prose-blockquote:text-gray-600 prose-blockquote:font-normal prose-blockquote:text-base prose-strong:font-semibold max-w-none font-inter'
@@ -42,7 +33,7 @@ export const PriceEstimateResult: React.FC<PriceEstimateResultProps> = ({
          {formattedText ? (
             <React.Fragment>
                <div className={proseClasses}>
-                  <ReactMarkdown {...markdownProps}>
+                  <ReactMarkdown {...ReactMarkdownPlugins}>
                      {formattedText}
                   </ReactMarkdown>
                </div>
