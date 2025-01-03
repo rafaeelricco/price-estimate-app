@@ -37,25 +37,33 @@ export const AiResultDisplay: React.FC<AiResultDisplayProps> = ({
    return (
       <div className={containerClasses}>
          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-gray-900">Resultado</h3>
+            <h3 className="text-lg font-semibold">Resultado</h3>
          </div>
-         <div className={proseClasses}>
-            <ReactMarkdown {...markdownProps}>{formattedText}</ReactMarkdown>
-         </div>
-         {!isLoading && isCompleted && (
-            <Button
-               type="button"
-               variant="outline"
-               size="icon"
-               className="bg-transparent"
-               onClick={onCopy}
-            >
-               {isCopied ? (
-                  <Check size={20} className="text-green-500" />
-               ) : (
-                  <Copy size={20} className="text-gray-500" />
+         {formattedText ? (
+            <React.Fragment>
+               <div className={proseClasses}>
+                  <ReactMarkdown {...markdownProps}>
+                     {formattedText}
+                  </ReactMarkdown>
+               </div>
+               {!isLoading && isCompleted && (
+                  <Button
+                     type="button"
+                     variant="outline"
+                     size="icon"
+                     className="bg-transparent"
+                     onClick={onCopy}
+                  >
+                     {isCopied ? (
+                        <Check size={20} className="text-green-500" />
+                     ) : (
+                        <Copy size={20} className="text-gray-500" />
+                     )}
+                  </Button>
                )}
-            </Button>
+            </React.Fragment>
+         ) : (
+            <p className="text-gray-500">Nenhum resultado para exibir</p>
          )}
       </div>
    )
