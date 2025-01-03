@@ -22,16 +22,10 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipBoard'
 import { calculateTotal, formatCurrency } from '@/utils/formatters'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Check, Copy, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-import ReactMarkdown from 'react-markdown'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import rehypeHighlight from 'rehype-highlight'
-import rehypeRaw from 'rehype-raw'
-import rehypeSlug from 'rehype-slug'
-import remarkBreaks from 'remark-breaks'
-import remarkGfm from 'remark-gfm'
+import { AiResultDisplay } from '@/components/ui/ai-result-display'
 
 const AiAnalysisSchema = z.object({
    suggestedTotal: z
@@ -117,6 +111,8 @@ const AiCalculator: React.FC = () => {
       onStreamUpdate: (text: string) => void
    ) => {
       setIsCompleted(false)
+      setStreamedText('')
+      setIsLoading(true)
       try {
          const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
          if (!apiKey) {
@@ -145,6 +141,8 @@ const AiCalculator: React.FC = () => {
             IMPORTANTE: Sua resposta DEVE seguir EXATAMENTE esta estrutura, mantendo a formatação Markdown:
 
             # Valor sugerido: R$ [VALOR_CALCULADO]
+            > Confiança da análise: 85%
+
 
             ## Explicação
             [Explicação clara e objetiva do valor sugerido, considerando o valor base calculado e justificando eventuais ajustes. Foque em demonstrar o valor para o cliente.]
@@ -226,7 +224,8 @@ const AiCalculator: React.FC = () => {
       } catch (error) {
          console.error('Erro na análise da IA:', error)
          throw new Error('Falha ao processar resposta da IA')
-         setIsCompleted(false)
+      } finally {
+         setIsLoading(false)
       }
    }
 
@@ -234,7 +233,6 @@ const AiCalculator: React.FC = () => {
       <div className="space-y-6">
          <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-               {/* Lista de Tarefas */}
                <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Lista de Tarefas</h3>
                   {form.watch('tasks').map((task, index) => (
@@ -293,7 +291,6 @@ const AiCalculator: React.FC = () => {
                               <Trash2 size={20} />
                            </Button>
                         </div>
-
                         <FormField
                            control={form.control}
                            name={`tasks.${index}.difficulty`}
@@ -348,8 +345,6 @@ const AiCalculator: React.FC = () => {
                      Adicionar Tarefa
                   </Button>
                </div>
-
-               {/* Configurações - make it stack on mobile */}
                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
                   <FormField
                      control={form.control}
@@ -379,7 +374,6 @@ const AiCalculator: React.FC = () => {
                         </FormItem>
                      )}
                   />
-
                   <FormField
                      control={form.control}
                      name="config.safetyMargin"
@@ -408,7 +402,6 @@ const AiCalculator: React.FC = () => {
                         </FormItem>
                      )}
                   />
-
                   <FormField
                      control={form.control}
                      name="config.valueAdjustment"
@@ -438,8 +431,6 @@ const AiCalculator: React.FC = () => {
                      )}
                   />
                </div>
-
-               {/* Contexto do Projeto */}
                <FormField
                   control={form.control}
                   name="context.projectContext"
@@ -477,7 +468,6 @@ const AiCalculator: React.FC = () => {
             </form>
          </Form>
 
-         {/* Resumo do Cálculo - make it stack on mobile */}
          {form.watch('tasks').length > 0 && (
             <div className="rounded-lg bg-gray-50 p-4">
                <h3 className="text-lg font-semibold">Resumo do cálculo base</h3>
@@ -499,73 +489,17 @@ const AiCalculator: React.FC = () => {
                </div>
             </div>
          )}
-
-         {/* Resultado da IA */}
-         {isLoading && formattedAnimatedText ? (
-            <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
-               <h3 className="text-xl font-semibold text-gray-900">
-                  Análise da IA
-               </h3>
-               <div className="prose prose-slate flex max-w-none flex-col">
-                  {formattedAnimatedText && (
-                     <ReactMarkdown
-                        remarkPlugins={[remarkGfm, remarkBreaks]}
-                        rehypePlugins={[
-                           rehypeRaw,
-                           rehypeSlug,
-                           [rehypeAutolinkHeadings, { behavior: 'wrap' }],
-                           rehypeHighlight
-                        ]}
-                     >
-                        {formattedAnimatedText}
-                     </ReactMarkdown>
-                  )}
-               </div>
-            </div>
-         ) : aiAnalysis ? (
-            <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
-               <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                     Análise da IA
-                  </h3>
-               </div>
-               <div className="prose prose-slate prose-headings:text-xl prose-headings:my-1 prose-headings:font-semibold prose-blockquote:my-1 prose-a:no-underline prose-blockquote:text-gray-600 prose-blockquote:font-normal prose-blockquote:text-base prose-strong:font-semibold max-w-none font-inter">
-                  <ReactMarkdown
-                     remarkPlugins={[remarkGfm, remarkBreaks]}
-                     rehypePlugins={[
-                        rehypeRaw,
-                        rehypeSlug,
-                        [rehypeAutolinkHeadings, { behavior: 'wrap' }],
-                        rehypeHighlight
-                     ]}
-                  >
-                     {formattedAnimatedText}
-                  </ReactMarkdown>
-               </div>
-               {isCompleted && (
-                  <Button
-                     type="button"
-                     variant="outline"
-                     size="icon"
-                     className="bg-transparent"
-                     onClick={() => {
-                        copyToClipboard(formattedAnimatedText)
-                     }}
-                  >
-                     {isCopied ? (
-                        <Check size={20} className="text-green-500" />
-                     ) : (
-                        <Copy size={20} className="text-gray-500" />
-                     )}
-                  </Button>
-               )}
-            </div>
-         ) : null}
+         <AiResultDisplay
+            isLoading={isLoading}
+            formattedText={formattedAnimatedText}
+            isCompleted={isCompleted}
+            isCopied={isCopied}
+            onCopy={() => copyToClipboard(formattedAnimatedText)}
+         />
       </div>
    )
 }
 
-// Schema para uma única tarefa
 const TaskSchema = z.object({
    description: z
       .string()
@@ -577,7 +511,6 @@ const TaskSchema = z.object({
    difficulty: z.number().min(0).max(5).default(2)
 })
 
-// Schema para as configurações do cálculo
 const CalculationConfigSchema = z.object({
    hourlyRate: z
       .string()
@@ -598,7 +531,6 @@ const CalculationConfigSchema = z.object({
       })
 })
 
-// Schema para o contexto do projeto
 const ProjectContextSchema = z.object({
    projectContext: z
       .string()
@@ -606,7 +538,6 @@ const ProjectContextSchema = z.object({
       .max(1000, 'Contexto muito longo')
 })
 
-// Schema completo da aplicação
 const PriceEstimateSchema = z.object({
    tasks: z.array(TaskSchema).min(1, 'Adicione pelo menos uma tarefa'),
    config: CalculationConfigSchema,
@@ -614,10 +545,9 @@ const PriceEstimateSchema = z.object({
    aiAnalysis: AiAnalysisSchema.nullable().optional()
 })
 
-// Types inferidos do schema
-type Task = z.infer<typeof TaskSchema>
-type CalculationConfig = z.infer<typeof CalculationConfigSchema>
-type ProjectContext = z.infer<typeof ProjectContextSchema>
+export type Task = z.infer<typeof TaskSchema>
+export type CalculationConfig = z.infer<typeof CalculationConfigSchema>
+export type ProjectContext = z.infer<typeof ProjectContextSchema>
 export type PriceEstimate = z.infer<typeof PriceEstimateSchema>
 export type AiAnalysis = z.infer<typeof AiAnalysisSchema>
 
