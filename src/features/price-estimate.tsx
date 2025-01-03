@@ -59,8 +59,7 @@ const AiCalculator: React.FC = () => {
          tasks: [{ description: '', hours: '', difficulty: 2 }],
          config: {
             hourlyRate: '',
-            safetyMargin: '',
-            valueAdjustment: ''
+            safetyMargin: ''
          },
          context: { projectContext: '' },
          aiAnalysis: null
@@ -345,7 +344,7 @@ const AiCalculator: React.FC = () => {
                      Adicionar Tarefa
                   </Button>
                </div>
-               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
+               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                   <FormField
                      control={form.control}
                      name="config.hourlyRate"
@@ -394,34 +393,6 @@ const AiCalculator: React.FC = () => {
                                  <Input
                                     type="number"
                                     placeholder="Ex: 20"
-                                    {...field}
-                                 />
-                              </FormControl>
-                           </div>
-                           <FormMessage />
-                        </FormItem>
-                     )}
-                  />
-                  <FormField
-                     control={form.control}
-                     name="config.valueAdjustment"
-                     render={({ field }) => (
-                        <FormItem>
-                           <FormLabel
-                              tooltip={
-                                 <TooltipGenericMessage
-                                    title="Ajuste de valor"
-                                    description="É o valor que você adiciona ao valor base para garantir uma margem de lucro."
-                                 />
-                              }
-                           >
-                              Ajuste de valor
-                           </FormLabel>
-                           <div className="flex items-center gap-2">
-                              <FormControl>
-                                 <Input
-                                    type="number"
-                                    placeholder="Ex: 10"
                                     {...field}
                                  />
                               </FormControl>
@@ -523,12 +494,7 @@ const CalculationConfigSchema = z.object({
       .refine(
          (val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 100,
          { message: 'Margem de segurança deve ser entre 0 e 100%' }
-      ),
-   valueAdjustment: z
-      .string()
-      .refine((val) => !isNaN(Number(val)) && Number(val) >= -100, {
-         message: 'Ajuste de valor deve ser maior que -100%'
-      })
+      )
 })
 
 const ProjectContextSchema = z.object({
