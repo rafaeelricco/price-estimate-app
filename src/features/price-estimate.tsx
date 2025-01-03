@@ -386,7 +386,7 @@ const AiCalculator: React.FC = () => {
                                  />
                               }
                            >
-                              Margem de segurança
+                              Margem de segurança (%)
                            </FormLabel>
                            <div className="flex items-center gap-2">
                               <FormControl>
@@ -455,7 +455,9 @@ const AiCalculator: React.FC = () => {
                   </p>
                   <p className="font-semibold">
                      Final:{' '}
-                     {formatCurrency(calculateTotal(form.watch()).finalTotal)}
+                     {formatCurrency(
+                        calculateTotal(form.watch()).withSafetyMargin
+                     )}
                   </p>
                </div>
             </div>

@@ -7,13 +7,10 @@ export const calculateTotal = (values: PriceEstimate) => {
 
    const withSafetyMargin =
       baseTotal * (1 + Number(values.config.safetyMargin) / 100)
-   const finalTotal =
-      withSafetyMargin * (1 + Number(values.config.valueAdjustment) / 100)
 
    return {
       baseTotal,
-      withSafetyMargin,
-      finalTotal
+      withSafetyMargin
    }
 }
 
