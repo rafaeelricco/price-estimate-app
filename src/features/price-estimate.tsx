@@ -18,16 +18,13 @@ import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import { TooltipGenericMessage } from '@/components/ui/tooltip'
 import { useAnimatedText } from '@/hooks/useAnimatedText'
-import {
-   calculateTotal,
-   extractSection,
-   formatCurrency
-} from '@/utils/formatters'
+import { calculateTotal, formatCurrency } from '@/utils/formatters'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Sparkles, Trash2 } from 'lucide-react'
-import MarkdownIt from 'markdown-it'
 import { useForm } from 'react-hook-form'
+
+import MarkdownIt from 'markdown-it'
 
 // Inicializa o markdown parser com opções específicas
 const md = new MarkdownIt({
@@ -38,9 +35,11 @@ const md = new MarkdownIt({
 })
 
 const AiAnalysisSchema = z.object({
-   suggestedTotal: z.number().positive('O valor sugerido deve ser positivo'),
-   explanation: z.string().min(1, 'A explicação é obrigatória'),
-   marketAnalysis: z.string().min(1, 'A análise de mercado é obrigatória'),
+   suggestedTotal: z
+      .number()
+      .nonnegative('O valor sugerido deve ser positivo ou zero'),
+   explanation: z.string(),
+   marketAnalysis: z.string(),
    confidence: z.number().min(0).max(100).optional(),
    factors: z.array(z.string()).optional(),
    recommendations: z.array(z.string()).optional()
@@ -58,147 +57,6 @@ const PriceEstimate: React.FC = () => {
    )
 }
 
-const handleAiAnalysis = async (
-   values: PriceEstimate,
-   onStreamUpdate: (text: string) => void
-) => {
-   try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
-      if (!apiKey) {
-         console.error('API Key não encontrada!')
-         throw new Error('API Key não configurada')
-      }
-
-      const genAI = new GoogleGenerativeAI(apiKey)
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
-
-      const totalHours = values.tasks.reduce(
-         (sum, task) => sum + (Number(task.hours) || 0),
-         0
-      )
-      const baseTotal = values.tasks.reduce(
-         (sum, task) =>
-            sum + (Number(task.hours) || 0) * Number(values.config.hourlyRate),
-         0
-      )
-
-      // Estrutura o prompt para o Gemini
-      const prompt = `Você é um especialista em precificação de projetos freelance. 
-         Por favor, analise este projeto e forneça uma resposta estruturada.
-
-         CONTEXTO DO PROJETO:
-         ${values.context.projectContext}
-
-         DETALHES TÉCNICOS:
-         - Total de horas estimadas: ${totalHours}h
-         - Taxa horária base: R$${values.config.hourlyRate}/h
-         - Margem de segurança aplicada: ${values.config.safetyMargin}%
-         - Valor base calculado: ${formatCurrency(baseTotal)}
-
-         TAREFAS DO PROJETO:
-         ${values.tasks
-            .map(
-               (task) =>
-                  `- ${task.description} (${task.hours}h)
-             Nível de dificuldade: ${['Muito fácil', 'Fácil', 'Médio', 'Intermediário', 'Difícil', 'Muito difícil'][task.difficulty]}
-            `
-            )
-            .join('\n')}
-
-         Por favor, considere o nível de dificuldade de cada tarefa ao fazer sua análise e ajuste o valor sugerido de acordo.
-         Tarefas mais difíceis podem requerer um valor/hora maior devido à complexidade técnica envolvida.
-
-         Por favor, forneça sua análise no seguinte formato específico:
-
-         VALOR_SUGERIDO: [apenas o número em reais]
-
-         EXPLICAÇÃO:
-         [sua explicação detalhada, incluindo como a dificuldade das tarefas influenciou o valor]
-
-         ANÁLISE_DE_MERCADO:
-         [sua análise do mercado]
-
-         FATORES:
-         - [liste os fatores considerados]
-
-         RECOMENDAÇÕES:
-         - [liste as recomendações]`
-
-      // Gera o conteúdo usando streaming
-      const result = await model.generateContentStream(prompt)
-      let fullResponse = ''
-
-      // Processa cada chunk da resposta
-      for await (const chunk of result.stream) {
-         const chunkText = chunk.text()
-         fullResponse += chunkText
-         // Emite o chunk para animação
-         onStreamUpdate(fullResponse)
-      }
-
-      // Processa a resposta final
-      try {
-         // Extrai o valor sugerido (procura por um número após "VALOR_SUGERIDO:")
-         const valueMatch = fullResponse.match(
-            /VALOR_SUGERIDO:\s*R?\$?\s*([\d,.]+)/i
-         )
-         const suggestedTotal = valueMatch
-            ? Number(valueMatch[1].replace(/\./g, '').replace(',', '.'))
-            : baseTotal
-
-         // Extrai as seções usando os marcadores
-         const explanation = extractSection(
-            fullResponse,
-            'EXPLICAÇÃO:',
-            'ANÁLISE_DE_MERCADO:'
-         )
-         const marketAnalysis = extractSection(
-            fullResponse,
-            'ANÁLISE_DE_MERCADO:',
-            'FATORES:'
-         )
-         const factorsSection = extractSection(
-            fullResponse,
-            'FATORES:',
-            'RECOMENDAÇÕES:'
-         )
-         const recommendationsSection = extractSection(
-            fullResponse,
-            'RECOMENDAÇÕES:',
-            null
-         )
-
-         // Processa as listas de fatores e recomendações
-         const factors = factorsSection
-            .split('\n')
-            .filter((line) => line.trim().startsWith('-'))
-            .map((line) => line.replace('-', '').trim())
-
-         const recommendations = recommendationsSection
-            .split('\n')
-            .filter((line) => line.trim().startsWith('-'))
-            .map((line) => line.replace('-', '').trim())
-
-         const analysis: AiAnalysis = {
-            suggestedTotal,
-            explanation: explanation.trim(),
-            marketAnalysis: marketAnalysis.trim(),
-            confidence: 85,
-            factors,
-            recommendations
-         }
-
-         return AiAnalysisSchema.parse(analysis)
-      } catch (error) {
-         console.error('Erro ao processar resposta:', error)
-         throw new Error('Falha ao processar resposta da IA')
-      }
-   } catch (error) {
-      console.error('Erro na análise da IA:', error)
-      throw error
-   }
-}
-
 const AiCalculator: React.FC = () => {
    const form = useForm<PriceEstimate>({
       resolver: zodResolver(PriceEstimateSchema),
@@ -213,9 +71,11 @@ const AiCalculator: React.FC = () => {
          aiAnalysis: null
       }
    })
+   console.log('form', form.getValues())
    const [isLoading, setIsLoading] = React.useState(false)
    const [streamedText, setStreamedText] = React.useState('')
    const formattedAnimatedText = useAnimatedText(streamedText)
+   console.log('formattedAnimatedText', formattedAnimatedText)
 
    const onSubmit = async (values: PriceEstimate) => {
       setIsLoading(true)
@@ -224,7 +84,21 @@ const AiCalculator: React.FC = () => {
          const result = await handleAiAnalysis(values, (text) => {
             setStreamedText(text)
          })
-         if (result) form.setValue('aiAnalysis', result)
+         if (result) {
+            const valueMatch = result.match(
+               /Valor sugerido:.*?R\$\s*([\d,.]+)/i
+            )
+            form.setValue('aiAnalysis', {
+               suggestedTotal: valueMatch
+                  ? Number(valueMatch[1].replace(/\./g, '').replace(',', '.'))
+                  : 0,
+               explanation: result,
+               marketAnalysis: '',
+               confidence: 85,
+               factors: [],
+               recommendations: []
+            })
+         }
       } catch (error) {
          console.error('Erro:', error)
       } finally {
@@ -233,6 +107,109 @@ const AiCalculator: React.FC = () => {
    }
 
    const aiAnalysis = form.watch('aiAnalysis')
+
+   const handleAiAnalysis = async (
+      values: PriceEstimate,
+      onStreamUpdate: (text: string) => void
+   ) => {
+      try {
+         const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+         if (!apiKey) {
+            console.error('API Key não encontrada!')
+            throw new Error('API Key não configurada')
+         }
+
+         const genAI = new GoogleGenerativeAI(apiKey)
+         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+
+         const totalHours = values.tasks.reduce(
+            (sum, task) => sum + (Number(task.hours) || 0),
+            0
+         )
+         const baseTotal = values.tasks.reduce(
+            (sum, task) =>
+               sum +
+               (Number(task.hours) || 0) * Number(values.config.hourlyRate),
+            0
+         )
+
+         // Estrutura o prompt para o Gemini
+         const prompt = `Você é um especialista em precificação de projetos freelance. 
+            Por favor, analise este projeto e forneça uma resposta estruturada usando Markdown.
+            A resposta deve seguir exatamente esta estrutura:
+   
+            <div class="rounded-md bg-white p-4 shadow-sm mb-4">
+               <p class="text-2xl font-bold text-green-600">Valor sugerido: R$ [valor]</p>
+               <p class="text-sm text-gray-500">Confiança da análise: 85%</p>
+            </div>
+   
+            <div class="space-y-2">
+               <h4 class="text-gray-700 mt-4 font-semibold">Explicação</h4>
+               [explicação em markdown]
+            </div>
+   
+            <div class="space-y-2">
+               <h4 class="text-gray-700 mt-4 font-semibold">Análise de mercado</h4>
+               [análise em markdown]
+            </div>
+   
+            [outras seções conforme necessário, seguindo o mesmo padrão]
+   
+            CONTEXTO DO PROJETO:
+            ${values.context.projectContext}
+   
+            DETALHES TÉCNICOS:
+            - Total de horas estimadas: ${totalHours}h (quebra de linha) 
+            - Taxa horária base: R$${values.config.hourlyRate}/h (quebra de linha)
+            - Margem de segurança aplicada: ${values.config.safetyMargin}% (quebra de linha)
+            - Valor base calculado: ${formatCurrency(baseTotal)} (quebra de linha)
+   
+            TAREFAS DO PROJETO:
+            ${values.tasks
+               .map(
+                  (task) =>
+                     `- ${task.description} (${task.hours}h)
+                Nível de dificuldade: ${['Muito fácil', 'Fácil', 'Médio', 'Intermediário', 'Difícil', 'Muito difícil'][task.difficulty]}
+               `
+               )
+               .join('\n')}`
+
+         // Gera o conteúdo usando streaming
+         const result = await model.generateContentStream(prompt)
+         let fullResponse = ''
+
+         // Processa cada chunk da resposta
+         for await (const chunk of result.stream) {
+            const chunkText = chunk.text()
+            fullResponse += chunkText
+            // Emite o chunk para animação
+            onStreamUpdate(fullResponse)
+         }
+
+         // Extrai o valor sugerido para o state (usando regex mais flexível)
+         const valueMatch = fullResponse.match(
+            /Valor sugerido:.*?R\$\s*([\d,.]+)/i
+         )
+         const suggestedTotal = valueMatch
+            ? Number(valueMatch[1].replace(/\./g, '').replace(',', '.'))
+            : 0
+
+         // Atualiza o state com o valor sugerido e o texto completo
+         form.setValue('aiAnalysis', {
+            suggestedTotal,
+            explanation: fullResponse,
+            marketAnalysis: '',
+            confidence: 85,
+            factors: [],
+            recommendations: []
+         })
+
+         return fullResponse
+      } catch (error) {
+         console.error('Erro na análise da IA:', error)
+         throw new Error('Falha ao processar resposta da IA')
+      }
+   }
 
    return (
       <div className="space-y-6">
@@ -510,16 +487,21 @@ const AiCalculator: React.FC = () => {
                   className="prose prose-gray max-w-none"
                   dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
                />
-               <span className="animate-pulse">|</span>
+               <span className="animate-pulse text-gray-500">|</span>
             </div>
          ) : aiAnalysis ? (
             <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
                <h3 className="text-xl font-semibold text-gray-900">
                   Análise da IA
                </h3>
+               <div
+                  className="prose prose-gray max-w-none"
+                  dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
+               />
+               <span className="animate-pulse text-gray-500">|</span>
 
                {/* Valor Sugerido */}
-               <div className="rounded-md bg-white p-4 shadow-sm">
+               {/* <div className="rounded-md bg-white p-4 shadow-sm">
                   <p className="text-2xl font-bold text-green-600">
                      Valor sugerido:{' '}
                      {formatCurrency(aiAnalysis?.suggestedTotal ?? 0)}
@@ -529,21 +511,22 @@ const AiCalculator: React.FC = () => {
                         Confiança da análise: {aiAnalysis?.confidence}%
                      </p>
                   )}
-               </div>
+               </div> */}
 
                {/* Explicação */}
-               <div className="space-y-2">
+               {/* <div className="space-y-2">
                   <h4 className="font-medium text-gray-700">Explicação</h4>
                   <div
+                     key={aiAnalysis?.explanation}
                      className="prose prose-gray max-w-none text-gray-600"
                      dangerouslySetInnerHTML={{
                         __html: md.render(aiAnalysis?.explanation ?? '')
                      }}
                   />
-               </div>
+               </div> */}
 
                {/* Análise de Mercado */}
-               <div className="space-y-2">
+               {/* <div className="space-y-2">
                   <h4 className="font-medium text-gray-700">
                      Análise de mercado
                   </h4>
@@ -553,10 +536,10 @@ const AiCalculator: React.FC = () => {
                         __html: md.render(aiAnalysis?.marketAnalysis ?? '')
                      }}
                   />
-               </div>
+               </div> */}
 
                {/* Fatores Considerados */}
-               {aiAnalysis?.factors?.length &&
+               {/* {aiAnalysis?.factors?.length &&
                   aiAnalysis?.factors?.length > 0 && (
                      <div className="space-y-2">
                         <h4 className="font-medium text-gray-700">
@@ -574,10 +557,10 @@ const AiCalculator: React.FC = () => {
                            ))}
                         </ul>
                      </div>
-                  )}
+                  )} */}
 
                {/* Recomendações */}
-               {aiAnalysis?.recommendations?.length &&
+               {/* {aiAnalysis?.recommendations?.length &&
                   aiAnalysis?.recommendations?.length > 0 && (
                      <div className="space-y-2">
                         <h4 className="font-medium text-gray-700">
@@ -595,7 +578,7 @@ const AiCalculator: React.FC = () => {
                            ))}
                         </ul>
                      </div>
-                  )}
+                  )} */}
             </div>
          ) : null}
       </div>

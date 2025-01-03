@@ -6,6 +6,7 @@ import { animate } from 'motion'
 
 import MarkdownIt from 'markdown-it'
 
+const delimiter = '' // or " " to split by word
 const md = new MarkdownIt({
    breaks: true,
    html: true,
@@ -24,8 +25,8 @@ export function useAnimatedText(text: string) {
    }
 
    React.useEffect(() => {
-      const controls = animate(startingCursor, text.length, {
-         duration: 0.1, // Reduzindo ainda mais para melhor feedback
+      const controls = animate(startingCursor, text.split(delimiter).length, {
+         duration: 0.5, // Reduzindo a duração para melhor experiência
          ease: 'linear',
          onUpdate(latest) {
             setCursor(Math.floor(latest))
@@ -37,30 +38,26 @@ export function useAnimatedText(text: string) {
 
    // Processa o texto atual com markdown
    const formattedText = React.useMemo(() => {
-      const currentText = text.slice(0, cursor)
+      const currentText = text.split(delimiter).slice(0, cursor).join(delimiter)
 
-      // Identifica seções por cabeçalhos específicos
-      const sections = currentText.split(
-         /(?=VALOR_SUGERIDO:|EXPLICAÇÃO:|ANÁLISE_DE_MERCADO:|FATORES:|RECOMENDAÇÕES:)/g
-      )
-
+      // Tenta identificar e preservar seções incompletas
+      const sections = currentText.split(/\n(?=\w+:)/g)
       const processedSections = sections.map((section, index) => {
-         // Processa cada seção individualmente
-         const trimmedSection = section.trim()
-
-         // Se a seção começa com um dos cabeçalhos conhecidos, formata como título
-         const formattedSection = trimmedSection.replace(
-            /^(VALOR_SUGERIDO|EXPLICAÇÃO|ANÁLISE_DE_MERCADO|FATORES|RECOMENDAÇÕES):/,
-            '### $1:'
-         )
-
-         // Formata listas
-         const withLists = formattedSection.replace(/^- /gm, '* ')
-
-         return md.render(withLists)
+         // Mantém a última seção sem formatação se estiver incompleta
+         if (
+            index === sections.length - 1 &&
+            !text
+               .split(delimiter)
+               .slice(cursor)
+               .join(delimiter)
+               .startsWith('\n')
+         ) {
+            return section
+         }
+         return md.render(section)
       })
 
-      return processedSections.join('')
+      return processedSections.join('\n')
    }, [text, cursor])
 
    return formattedText
