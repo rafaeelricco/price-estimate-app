@@ -468,30 +468,30 @@ const AiCalculator: React.FC = () => {
          <Dialog open={error !== ''} onOpenChange={() => setError('')}>
             <DialogContent className="max-h-[80vh] max-w-3xl overflow-y-auto">
                <DialogHeader>
-                  <div className="flex flex-col gap-4">
-                     <DialogTitle>Erro ao processar resposta</DialogTitle>
-                     <div className="flex flex-col gap-2">
-                        <div className="relative">
-                           <pre className="w-full whitespace-pre-wrap break-words rounded-lg bg-gray-100 p-4">
-                              <code className="break-all text-sm">{error}</code>
-                           </pre>
-                        </div>
-                        <Button
-                           type="button"
-                           variant="outline"
-                           size="icon"
-                           className="bg-transparent"
-                           onClick={() => copyToClipboard(error)}
-                        >
-                           {isCopied ? (
-                              <Check size={20} className="text-green-500" />
-                           ) : (
-                              <Copy size={20} className="text-gray-500" />
-                           )}
-                        </Button>
-                     </div>
-                  </div>
+                  <DialogTitle>Erro ao processar resposta</DialogTitle>
                </DialogHeader>
+               <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                     <div className="relative">
+                        <pre className="w-full whitespace-pre-wrap break-words rounded-lg bg-gray-100 p-4">
+                           <code className="break-all text-sm">{error}</code>
+                        </pre>
+                     </div>
+                     <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="bg-transparent"
+                        onClick={() => copyToClipboard(error)}
+                     >
+                        {isCopied ? (
+                           <Check size={20} className="text-green-500" />
+                        ) : (
+                           <Copy size={20} className="text-gray-500" />
+                        )}
+                     </Button>
+                  </div>
+               </div>
             </DialogContent>
          </Dialog>
       </React.Fragment>
