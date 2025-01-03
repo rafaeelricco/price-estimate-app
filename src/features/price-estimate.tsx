@@ -26,11 +26,12 @@ import { Check, Copy, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
 import MarkdownIt from 'markdown-it'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 // Inicializa o markdown parser com opções específicas
 const md = new MarkdownIt({
    breaks: true,
-   html: true,
    linkify: true,
    typographer: true
 })
@@ -141,61 +142,59 @@ const AiCalculator: React.FC = () => {
          )
 
          // Estrutura o prompt para o Gemini
-         const prompt = `Você é um especialista em precificação de projetos freelance. 
-            Por favor, analise este projeto e forneça uma resposta estruturada usando Markdown.
-            A resposta deve seguir exatamente esta estrutura:
-   
-            <div class="rounded-md bg-white p-4 shadow-sm mb-4">
-               <p class="text-2xl font-bold text-green-600">Valor sugerido: R$ [valor]</p>
-               <p class="text-sm text-gray-500">Confiança da análise: 85%</p>
-            </div>
-   
-            <div class="space-y-2">
-               <h4 class="text-gray-700 mt-4 font-semibold">Explicação</h4>
-               [explicação em markdown]
-            </div>
-   
-            <div class="space-y-2">
-               <h4 class="text-gray-700 mt-4 font-semibold">Análise de mercado</h4>
-               [análise em markdown]
-            </div>
+         const prompt = `Você é um especialista em precificação de projetos freelance com vasta experiência no mercado.
+            Analise cuidadosamente os dados fornecidos e gere uma resposta detalhada e profissional em Markdown.
 
-            <div class="space-y-2">
-               <h4 class="text-gray-700 mt-4 font-semibold">Fatores considerados</h4>
-               [fatores considerados em markdown]
-            </div>
+            IMPORTANTE: Sua resposta DEVE seguir EXATAMENTE esta estrutura, mantendo a formatação Markdown:
 
-            <div class="space-y-2">
-               <h4 class="text-gray-700 mt-4 font-semibold">Recomendações</h4>
-               [recomendações em markdown]
-            </div>
+            # Valor sugerido: R$ [VALOR_CALCULADO]
+            > Confiança da análise: 85%
 
-            <div class="space-y-2">
-               <h4 class="text-gray-700 mt-4 font-semibold">Conclusão</h4>
-               [conclusão em markdown]
-            </div>
-   
-            [outras seções conforme necessário, seguindo o mesmo padrão]
-   
-            CONTEXTO DO PROJETO:
+            ## Explicação
+            [Explicação clara e objetiva do valor sugerido, considerando o valor base calculado e justificando eventuais ajustes. Foque em demonstrar o valor para o cliente.]
+
+            ## Análise de mercado
+            [Análise do cenário atual do mercado, posicionamento do projeto e justificativa do valor em relação à concorrência.]
+
+            ## Fatores considerados
+            [Liste em tópicos os principais fatores que influenciaram a precificação, como:
+            - Valor percebido pelo cliente
+            - Complexidade técnica
+            - Expertise necessária
+            - Prazos e urgência
+            - Outros fatores relevantes]
+
+            ## Recomendações
+            [Recomendações práticas para o sucesso do projeto e da negociação, incluindo:
+            - Sugestões contratuais
+            - Estratégias de comunicação
+            - Possíveis pacotes ou opções
+            - Pontos de atenção]
+
+            ## Conclusão
+            [Resumo final justificando o valor e destacando os principais benefícios para o cliente]
+
+            ## Negociação
+            [Estratégias e dicas para a negociação do valor, incluindo possíveis margens de flexibilidade]
+
+            DADOS DO PROJETO:
             ${values.context.projectContext}
-   
-            DETALHES TÉCNICOS:
-            - Total de horas estimadas: ${totalHours}h (quebra de linha) 
-            - Taxa horária base: R$${values.config.hourlyRate}/h (quebra de linha)
-            - Margem de segurança aplicada: ${values.config.safetyMargin}% (quebra de linha)
-            - Valor base calculado: ${formatCurrency(baseTotal)} (quebra de linha)
-   
-            TAREFAS DO PROJETO:
+
+            INFORMAÇÕES TÉCNICAS:
+            - Horas totais estimadas: ${totalHours}h
+            - Taxa horária: R$${values.config.hourlyRate}/h
+            - Margem de segurança: ${values.config.safetyMargin}%
+            - Valor base: ${formatCurrency(baseTotal)}
+
+            ESCOPO E TAREFAS:
             ${values.tasks
                .map(
                   (task) =>
                      `- ${task.description} (${task.hours}h)
-                Nível de dificuldade: ${['Muito fácil', 'Fácil', 'Médio', 'Intermediário', 'Difícil', 'Muito difícil'][task.difficulty]}
-               `
+                     Complexidade: ${['Muito fácil', 'Fácil', 'Médio', 'Intermediário', 'Difícil', 'Muito difícil'][task.difficulty]}`
                )
                .join('\n')}
-               `
+            `
 
          // Gera o conteúdo usando streaming
          const result = await model.generateContentStream(prompt)
@@ -508,12 +507,10 @@ const AiCalculator: React.FC = () => {
                <h3 className="text-xl font-semibold text-gray-900">
                   Análise da IA
                </h3>
-               <div className="flex">
-                  <div
-                     className="prose prose-gray max-w-none"
-                     dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
-                  />
-                  <span className="animate-pulse text-gray-500">|</span>
+               <div className="flex flex-col">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                     {formattedAnimatedText}
+                  </ReactMarkdown>
                </div>
             </div>
          ) : aiAnalysis ? (
@@ -523,10 +520,9 @@ const AiCalculator: React.FC = () => {
                      Análise da IA
                   </h3>
                </div>
-               <div
-                  className="prose prose-gray max-w-none"
-                  dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
-               />
+               <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {formattedAnimatedText}
+               </ReactMarkdown>
                {isCompleted && (
                   <Button
                      type="button"
