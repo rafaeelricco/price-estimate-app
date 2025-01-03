@@ -25,16 +25,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Check, Copy, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-import MarkdownIt from 'markdown-it'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-
-// Inicializa o markdown parser com opções específicas
-const md = new MarkdownIt({
-   breaks: true,
-   linkify: true,
-   typographer: true
-})
 
 const AiAnalysisSchema = z.object({
    suggestedTotal: z
