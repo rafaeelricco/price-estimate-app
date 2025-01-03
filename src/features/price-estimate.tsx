@@ -152,6 +152,21 @@ const AiCalculator: React.FC = () => {
                <h4 class="text-gray-700 mt-4 font-semibold">Análise de mercado</h4>
                [análise em markdown]
             </div>
+
+            <div class="space-y-2">
+               <h4 class="text-gray-700 mt-4 font-semibold">Fatores considerados</h4>
+               [fatores considerados em markdown]
+            </div>
+
+            <div class="space-y-2">
+               <h4 class="text-gray-700 mt-4 font-semibold">Recomendações</h4>
+               [recomendações em markdown]
+            </div>
+
+            <div class="space-y-2">
+               <h4 class="text-gray-700 mt-4 font-semibold">Conclusão</h4>
+               [conclusão em markdown]
+            </div>
    
             [outras seções conforme necessário, seguindo o mesmo padrão]
    
@@ -172,7 +187,8 @@ const AiCalculator: React.FC = () => {
                 Nível de dificuldade: ${['Muito fácil', 'Fácil', 'Médio', 'Intermediário', 'Difícil', 'Muito difícil'][task.difficulty]}
                `
                )
-               .join('\n')}`
+               .join('\n')}
+               `
 
          // Gera o conteúdo usando streaming
          const result = await model.generateContentStream(prompt)
@@ -483,11 +499,12 @@ const AiCalculator: React.FC = () => {
                <h3 className="text-xl font-semibold text-gray-900">
                   Análise da IA
                </h3>
-               <div
-                  className="prose prose-gray max-w-none"
-                  dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
-               />
-               <span className="animate-pulse text-gray-500">|</span>
+               <div className="flex">
+                  <div
+                     className="prose prose-gray max-w-none"
+                     dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
+                  />
+               </div>
             </div>
          ) : aiAnalysis ? (
             <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
@@ -498,7 +515,6 @@ const AiCalculator: React.FC = () => {
                   className="prose prose-gray max-w-none"
                   dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
                />
-               <span className="animate-pulse text-gray-500">|</span>
 
                {/* Valor Sugerido */}
                {/* <div className="rounded-md bg-white p-4 shadow-sm">
