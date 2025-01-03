@@ -444,7 +444,7 @@ const AiCalculator: React.FC = () => {
                               />
                            }
                         >
-                           Análise com IA
+                           Contexto do projeto
                         </FormLabel>
                         <FormControl>
                            <Textarea
