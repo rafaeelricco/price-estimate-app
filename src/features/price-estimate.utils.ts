@@ -21,7 +21,6 @@ export const formatCurrency = (value: number) => {
    }).format(value)
 }
 
-// Helper function to extract sections
 export const extractSection = (
    text: string,
    startMarker: string,
