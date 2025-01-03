@@ -26,17 +26,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-const AiAnalysisSchema = z.object({
-   suggestedTotal: z
-      .number()
-      .nonnegative('O valor sugerido deve ser positivo ou zero'),
-   explanation: z.string(),
-   marketAnalysis: z.string(),
-   confidence: z.number().min(0).max(100).optional(),
-   factors: z.array(z.string()).optional(),
-   recommendations: z.array(z.string()).optional()
-})
-
 const PriceEstimate: React.FC = () => {
    return (
       <div className="grid min-h-[calc(100vh-4rem)] place-items-center">
@@ -51,7 +40,12 @@ const PriceEstimate: React.FC = () => {
 
 const AiCalculator: React.FC = () => {
    const { isCopied, copyToClipboard } = useCopyToClipboard()
-   console.log('isCopied', isCopied)
+
+   const [isLoading, setIsLoading] = React.useState(false)
+   const [streamedText, setStreamedText] = React.useState('')
+   const [isCompleted, setIsCompleted] = React.useState(false)
+
+   const formattedAnimatedText = useAnimatedText(streamedText)
    const form = useForm<PriceEstimate>({
       resolver: zodResolver(PriceEstimateSchema),
       defaultValues: {
@@ -64,22 +58,15 @@ const AiCalculator: React.FC = () => {
          aiAnalysis: null
       }
    })
-   console.log('form', form.getValues())
-
-   const [isLoading, setIsLoading] = React.useState(false)
-   const [streamedText, setStreamedText] = React.useState('')
-   const [isCompleted, setIsCompleted] = React.useState(false)
-
-   const formattedAnimatedText = useAnimatedText(streamedText)
-   console.log('formattedAnimatedText', formattedAnimatedText)
 
    const onSubmit = async (values: PriceEstimate) => {
       setIsLoading(true)
       setStreamedText('')
       try {
-         const result = await handleAiAnalysis(values, (text) => {
+         const result = await handleAiAnalysis(values, (text) =>
             setStreamedText(text)
-         })
+         )
+
          if (result) {
             const valueMatch = result.match(
                /Valor sugerido:.*?R\$\s*([\d,.]+)/i
@@ -88,11 +75,7 @@ const AiCalculator: React.FC = () => {
                suggestedTotal: valueMatch
                   ? Number(valueMatch[1].replace(/\./g, '').replace(',', '.'))
                   : 0,
-               explanation: result,
-               marketAnalysis: '',
-               confidence: 85,
-               factors: [],
-               recommendations: []
+               explanation: result
             })
          }
       } catch (error) {
@@ -101,8 +84,6 @@ const AiCalculator: React.FC = () => {
          setIsLoading(false)
       }
    }
-
-   const aiAnalysis = form.watch('aiAnalysis')
 
    const handleAiAnalysis = async (
       values: PriceEstimate,
@@ -195,7 +176,9 @@ const AiCalculator: React.FC = () => {
          // Processa cada chunk da resposta
          for await (const chunk of result.stream) {
             const chunkText = chunk.text()
+            console.log('chunkText', chunkText)
             fullResponse += chunkText
+            console.log('fullResponse', fullResponse)
             // Emite o chunk para animação
             onStreamUpdate(fullResponse)
          }
@@ -211,10 +194,7 @@ const AiCalculator: React.FC = () => {
          // Atualiza o state com o valor sugerido e o texto completo
          form.setValue('aiAnalysis', {
             suggestedTotal,
-            explanation: fullResponse,
-            marketAnalysis: '',
-            factors: [],
-            recommendations: []
+            explanation: fullResponse
          })
 
          setIsCompleted(true)
@@ -437,7 +417,6 @@ const AiCalculator: React.FC = () => {
                </Button>
             </form>
          </Form>
-
          {form.watch('tasks').length > 0 && (
             <div className="rounded-lg bg-gray-50 p-4">
                <h3 className="text-lg font-semibold">Resumo do cálculo base</h3>
@@ -471,6 +450,13 @@ const AiCalculator: React.FC = () => {
       </div>
    )
 }
+
+const AiAnalysisSchema = z.object({
+   suggestedTotal: z
+      .number()
+      .nonnegative('O valor sugerido deve ser positivo ou zero'),
+   explanation: z.string()
+})
 
 const TaskSchema = z.object({
    description: z
