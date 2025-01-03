@@ -18,10 +18,11 @@ import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import { TooltipGenericMessage } from '@/components/ui/tooltip'
 import { useAnimatedText } from '@/hooks/useAnimatedText'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipBoard'
 import { calculateTotal, formatCurrency } from '@/utils/formatters'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, Sparkles, Trash2 } from 'lucide-react'
+import { Check, Copy, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
 import MarkdownIt from 'markdown-it'
@@ -58,6 +59,8 @@ const PriceEstimate: React.FC = () => {
 }
 
 const AiCalculator: React.FC = () => {
+   const { isCopied, copyToClipboard } = useCopyToClipboard()
+   console.log('isCopied', isCopied)
    const form = useForm<PriceEstimate>({
       resolver: zodResolver(PriceEstimateSchema),
       defaultValues: {
@@ -72,8 +75,11 @@ const AiCalculator: React.FC = () => {
       }
    })
    console.log('form', form.getValues())
+
    const [isLoading, setIsLoading] = React.useState(false)
    const [streamedText, setStreamedText] = React.useState('')
+   const [isCompleted, setIsCompleted] = React.useState(false)
+
    const formattedAnimatedText = useAnimatedText(streamedText)
    console.log('formattedAnimatedText', formattedAnimatedText)
 
@@ -112,6 +118,7 @@ const AiCalculator: React.FC = () => {
       values: PriceEstimate,
       onStreamUpdate: (text: string) => void
    ) => {
+      setIsCompleted(false)
       try {
          const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
          if (!apiKey) {
@@ -220,10 +227,12 @@ const AiCalculator: React.FC = () => {
             recommendations: []
          })
 
+         setIsCompleted(true)
          return fullResponse
       } catch (error) {
          console.error('Erro na análise da IA:', error)
          throw new Error('Falha ao processar resposta da IA')
+         setIsCompleted(false)
       }
    }
 
@@ -504,17 +513,37 @@ const AiCalculator: React.FC = () => {
                      className="prose prose-gray max-w-none"
                      dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
                   />
+                  <span className="animate-pulse text-gray-500">|</span>
                </div>
             </div>
          ) : aiAnalysis ? (
             <div className="mt-8 space-y-4 rounded-lg bg-gray-50 p-4 sm:p-6">
-               <h3 className="text-xl font-semibold text-gray-900">
-                  Análise da IA
-               </h3>
+               <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                     Análise da IA
+                  </h3>
+               </div>
                <div
                   className="prose prose-gray max-w-none"
                   dangerouslySetInnerHTML={{ __html: formattedAnimatedText }}
                />
+               {isCompleted && (
+                  <Button
+                     type="button"
+                     variant="outline"
+                     size="icon"
+                     className="bg-transparent"
+                     onClick={() => {
+                        copyToClipboard(formattedAnimatedText)
+                     }}
+                  >
+                     {isCopied ? (
+                        <Check size={20} className="text-green-500" />
+                     ) : (
+                        <Copy size={20} className="text-gray-500" />
+                     )}
+                  </Button>
+               )}
             </div>
          ) : null}
       </div>
