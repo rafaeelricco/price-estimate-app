@@ -1,5 +1,12 @@
+/**
+ *  @title Zip Code Hook
+ *  @notice A custom React hook for fetching Brazilian postal code (CEP) information
+ *  @dev Uses the ViaCEP API to fetch address details
+ */
+
 import * as React from 'react'
 
+/** @dev Interface for API response */
 interface ZipCodeResponse {
    cep: string
    logradouro: string
@@ -14,6 +21,7 @@ interface ZipCodeResponse {
    erro?: boolean
 }
 
+/** @dev Interface for callback data */
 interface ZipCodeCallback {
    address: string
    city: string
@@ -23,12 +31,18 @@ interface ZipCodeCallback {
    error?: boolean
 }
 
+/**
+ *  @notice Creates a zip code fetcher with state management
+ *  @return Object containing zip code data, loading state, and fetch functions
+ */
 export const useZipCode = () => {
+   /** @dev Initialize states */
    const [zipCodeData, setZipCodeData] = React.useState<ZipCodeResponse | null>(
       null
    )
    const [loading, setLoading] = React.useState(false)
 
+   /** @dev Direct fetch function returning raw API data */
    const fetchZipCode = async (zipCode: string) => {
       const cleanZipCode = zipCode.replace(/\D/g, '')
       if (cleanZipCode.length !== 8) {
@@ -53,6 +67,7 @@ export const useZipCode = () => {
       }
    }
 
+   /** @dev Handler function with callback for processed data */
    const handleZipCode = async (
       zipCode: string,
       callback: (data: ZipCodeCallback) => void

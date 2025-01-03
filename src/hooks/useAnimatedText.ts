@@ -4,8 +4,6 @@
  *  @dev Uses the motion library for animation control and React's useState and useEffect hooks
  */
 
-'use client'
-
 import * as React from 'react'
 
 import { animate } from 'motion'
